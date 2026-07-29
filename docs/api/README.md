@@ -7,8 +7,19 @@ consistent response envelope:
 
 ```json
 { "success": true, "data": {} }
-{ "success": false, "message": "..." }
+{
+  "success": false,
+  "message": "...",
+  "error": {
+    "code": "ERROR_CODE",
+    "details": null
+  }
+}
 ```
+
+Known client, validation, database, rate-limit, and future JWT failures are
+normalized into this error envelope. Unknown server errors use the
+`INTERNAL_SERVER_ERROR` code and do not expose internal implementation details.
 
 ## Infrastructure endpoint
 
