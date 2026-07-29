@@ -12,6 +12,7 @@ import { apiRateLimiter } from "./middleware/rateLimiter";
 import { requestLogger } from "./middleware/requestLogger";
 import { responseCompression } from "./middleware/responseCompression";
 import { securityHeaders } from "./middleware/securityHeaders";
+import { apiRouter } from "./routes";
 import { successResponse } from "./utils/response";
 
 const app: Application = express();
@@ -32,6 +33,7 @@ app.get("/", (_req: Request, res: Response) => {
   successResponse(res, "DevHub API Running");
 });
 
+app.use("/api", apiRouter);
 app.use(notFound);
 app.use(errorHandler);
 

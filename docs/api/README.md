@@ -2,7 +2,7 @@
 
 API contracts and (eventually) an OpenAPI/Swagger specification live here.
 
-The API will be versioned under `/api` and follow REST conventions with a
+The API is organized under `/api/v1` and follows REST conventions with a
 consistent response envelope:
 
 ```json
@@ -26,6 +26,21 @@ unauthorized, forbidden, not-found, and internal-server-error responses.
 Known client, validation, database, rate-limit, and future JWT failures are
 normalized into this error envelope. Unknown server errors use the
 `INTERNAL_SERVER_ERROR` code and do not expose internal implementation details.
+
+## Versioned route namespace
+
+The initial router composition reserves these versioned namespaces. They do
+not expose endpoint handlers yet:
+
+```text
+/api/v1/auth
+/api/v1/users
+/api/v1/posts
+```
+
+Each future feature owns its endpoint definitions inside its versioned router.
+New API versions can be introduced alongside `v1` without changing existing
+client contracts.
 
 ## Infrastructure endpoint
 

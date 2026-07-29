@@ -138,6 +138,25 @@ server/
     └── integration/     # API-level tests against routes — real app + test DB
 ```
 
+### Versioned route composition
+
+```text
+server/src/routes/
+├── index.ts                 # Exposes the /api router
+└── api/
+    ├── index.ts             # Mounts supported API versions
+    └── v1/
+        ├── index.ts         # Composes /auth, /users, and /posts
+        ├── auth.routes.ts   # /api/v1/auth endpoints (future)
+        ├── users.routes.ts  # /api/v1/users endpoints (future)
+        └── posts.routes.ts  # /api/v1/posts endpoints (future)
+```
+
+The application mounts this tree at `/api`. Each feature router owns only its
+versioned endpoint definitions; the version and API routers only compose
+namespaces. This keeps controller wiring local to the feature and lets `v2`
+exist beside `v1` when a breaking API change is necessary.
+
 ### Why the server is layered this way
 
 The request flows in one direction:
