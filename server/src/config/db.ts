@@ -1,0 +1,24 @@
+// Database connection lifecycle.
+//
+// Why this exists: connection setup (and eventual retry / event logging) is a
+// config concern, not a runtime concern. Isolating it keeps `server.ts` small
+// and gives us one obvious place to add connection-pool tuning or
+// reconnection logic later.
+
+import mongoose from "mongoose";
+import { env } from "./env";
+import { logger } from "../utils/logger";
+
+export async function connectDB(): Promise<void> {
+  try {
+    await mongoose.connect(env.MONGODB_URI);
+    logger.info("Connected to MongoDB");
+  } catch (err) {
+    logger.error("MongoDB connection failed", err);
+    throw err;
+  }
+}
+
+export async function disconnectDB(): Promise<void> {
+  await mongoose.disconnect();
+}
