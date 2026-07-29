@@ -12,6 +12,7 @@ import { apiRateLimiter } from "./middleware/rateLimiter";
 import { requestLogger } from "./middleware/requestLogger";
 import { responseCompression } from "./middleware/responseCompression";
 import { securityHeaders } from "./middleware/securityHeaders";
+import { successResponse } from "./utils/response";
 
 const app: Application = express();
 
@@ -28,10 +29,7 @@ app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
 // Infrastructure status endpoint. No business routes are mounted yet.
 app.get("/", (_req: Request, res: Response) => {
-  res.status(200).json({
-    success: true,
-    message: "DevHub API Running",
-  });
+  successResponse(res, "DevHub API Running");
 });
 
 app.use(notFound);

@@ -1,13 +1,10 @@
 import type { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import { ZodError } from "zod";
-import type {
-  ErrorDetails,
-  ErrorResponsePayload,
-  NormalizedError,
-} from "../types/errors";
+import type { ErrorDetails, NormalizedError } from "../types/errors";
 import { AppError } from "../utils/AppError";
 import { logger } from "../utils/logger";
+import { errorResponse } from "../utils/response";
 
 interface IDuplicateKeyError {
   code: number;
@@ -31,14 +28,14 @@ function normalizeZodError(error: ZodError): NormalizedError {
 }
 
 function normalizeMongooseValidationError(
-  error: mongoose.Error.ValidationError
+  error: mongoose.Error.ValidationError,
 ): NormalizedError {
   const details: ErrorDetails = Object.values(error.errors).map(
     (validationError) => ({
       field: validationError.path,
       message: validationError.message,
       type: validationError.kind,
-    })
+    }),
   );
 
   return {
@@ -71,7 +68,7 @@ function isDuplicateKeyError(error: unknown): error is IDuplicateKeyError {
 }
 
 function normalizeDuplicateKeyError(
-  error: IDuplicateKeyError
+  error: IDuplicateKeyError,
 ): NormalizedError {
   const duplicateFields = Object.keys(error.keyValue ?? error.keyPattern ?? {});
 
@@ -162,7 +159,7 @@ export function errorHandler(
   error: unknown,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void {
   if (res.headersSent) {
     next(error);
@@ -183,14 +180,10 @@ export function errorHandler(
     logger.warn("Request failed", logContext);
   }
 
-  const response: ErrorResponsePayload = {
-    success: false,
+  errorResponse(res, {
+    statusCode: normalizedError.statusCode,
     message: normalizedError.message,
-    error: {
-      code: normalizedError.code,
-      details: normalizedError.details,
-    },
-  };
-
-  res.status(normalizedError.statusCode).json(response);
+    code: normalizedError.code,
+    details: normalizedError.details,
+  });
 }

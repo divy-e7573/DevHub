@@ -6,7 +6,7 @@ The API will be versioned under `/api` and follow REST conventions with a
 consistent response envelope:
 
 ```json
-{ "success": true, "data": {} }
+{ "success": true, "message": "...", "data": {} }
 {
   "success": false,
   "message": "...",
@@ -16,6 +16,12 @@ consistent response envelope:
   }
 }
 ```
+
+Successful responses may omit `data` when an endpoint has no response payload.
+Backend controllers and HTTP middleware must use the shared helpers in
+`server/src/utils/response.ts` instead of constructing response envelopes
+directly. The available named helpers cover successful, created, bad-request,
+unauthorized, forbidden, not-found, and internal-server-error responses.
 
 Known client, validation, database, rate-limit, and future JWT failures are
 normalized into this error envelope. Unknown server errors use the
