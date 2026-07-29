@@ -4,8 +4,8 @@ import express, {
   type Request,
   type Response,
 } from "express";
+import { config } from "./config/config";
 import { corsOptions } from "./config/cors";
-import { env } from "./config/env";
 import { errorHandler } from "./middleware/errorHandler";
 import { notFound } from "./middleware/notFound";
 import { apiRateLimiter } from "./middleware/rateLimiter";
@@ -17,7 +17,7 @@ import { successResponse } from "./utils/response";
 const app: Application = express();
 
 app.disable("x-powered-by");
-app.set("trust proxy", env.TRUST_PROXY);
+app.set("trust proxy", config.server.trustProxy);
 
 app.use(securityHeaders);
 app.use(cors(corsOptions));

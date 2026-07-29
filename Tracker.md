@@ -20,14 +20,14 @@ implementation.
 | Client structure | Auth and main route groups plus feature, component, hook, schema, service, store, config, lib, and type directories | `client/src/` |
 | Client infrastructure | Axios API instance, Redux Toolkit store factory, browser store provider, and `cn` utility | `client/src/services/api.ts`, `client/src/store/`, `client/src/lib/utils.ts` |
 | Server foundation | Express application separated from the process entry point; TypeScript strict mode enabled | `server/src/app.ts`, `server/src/server.ts`, `server/tsconfig.json` |
-| Server infrastructure | Validated environment configuration, centralized request and error logging, 404/error handling, and graceful HTTP shutdown | `server/src/config/`, `server/src/middleware/`, `server/src/utils/logger.ts` |
+| Server infrastructure | Centralized, immutable runtime configuration with typed environment validation, fail-fast startup checks, and production-specific HTTPS/proxy safeguards; centralized request and error logging, 404/error handling, and graceful HTTP shutdown | `server/src/config/`, `server/src/middleware/`, `server/src/utils/logger.ts` |
 | Backend HTTP foundation | Express bootstrap with Helmet, CORS, Morgan request logging, rate limiting, native gzip response compression, request parsing, and the root API status endpoint | `server/src/app.ts`, `server/src/middleware/`, `server/src/server.ts` |
 | API response utilities | Typed, reusable helpers for success, created, bad-request, unauthorized, forbidden, not-found, and masked internal-server-error responses; existing HTTP response writers use the shared response utility | `server/src/utils/response.ts`, `server/src/types/responses.ts`, `server/src/app.ts`, `server/src/middleware/errorHandler.ts` |
 | Global error system | Typed `AppError`, consistent error responses, and centralized normalization for validation, cast, duplicate-key, JWT-shaped, malformed JSON, 404, rate-limit, and unknown errors | `server/src/utils/AppError.ts`, `server/src/types/errors.ts`, `server/src/middleware/errorHandler.ts` |
 | Server structure | Layered directories for routes, controllers, services, repositories, models, validators, middleware, types, constants, and utilities | `server/src/` |
-| Test foundation | Jest + ts-jest configured; global error-handler and response-helper unit coverage added, with an integration-test location reserved | `server/jest.config.cjs`, `server/tests/` |
+| Test foundation | Jest + ts-jest configured; configuration, global error-handler, and response-helper unit coverage added, with an integration-test location reserved | `server/jest.config.cjs`, `server/tests/` |
 | Tooling | Development, build, lint, format, type-check, and test scripts defined for the workspace and packages; dependencies installed | Root, `client/package.json`, `server/package.json` |
-| Verification | Client/server type checks and production builds pass; backend global-error and response-helper tests pass | `npm run type-check`, `npm run build`, `npm test -w server` (2026-07-29) |
+| Verification | Client/server type checks and production builds pass; backend configuration, global-error, and response-helper tests pass | `npm run type-check`, `npm run build`, `npm test -w server` (2026-07-29) |
 
 ## Product features
 

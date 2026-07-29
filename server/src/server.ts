@@ -1,6 +1,6 @@
 import type { Server } from "node:http";
 import app from "./app";
-import { env } from "./config/env";
+import { config } from "./config/config";
 import { logger } from "./utils/logger";
 
 function closeServer(server: Server): void {
@@ -15,8 +15,10 @@ function closeServer(server: Server): void {
 }
 
 async function start(): Promise<void> {
-  const server = app.listen(env.PORT, () => {
-    logger.info(`DevHub API listening on http://localhost:${env.PORT}`);
+  const server = app.listen(config.server.port, config.server.host, () => {
+    logger.info(
+      `DevHub API listening on ${config.server.host}:${config.server.port}`,
+    );
   });
 
   const shutdown = (signal: string): void => {

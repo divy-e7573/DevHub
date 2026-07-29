@@ -1,4 +1,4 @@
-import { env } from "../config/env";
+import { config } from "../config/config";
 
 type LogLevel = "debug" | "info" | "warn" | "error";
 
@@ -10,7 +10,7 @@ const logPriorities: Record<LogLevel, number> = {
 };
 
 function writeLog(level: LogLevel, message: string, meta?: unknown): void {
-  if (logPriorities[level] < logPriorities[env.LOG_LEVEL]) {
+  if (logPriorities[level] < logPriorities[config.logging.level]) {
     return;
   }
 

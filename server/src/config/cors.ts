@@ -1,8 +1,8 @@
 import type { CorsOptions } from "cors";
-import { env } from "./env";
+import { config } from "./config";
 
 export const corsOptions: CorsOptions = {
-  origin: env.CLIENT_URL,
+  origin: config.client.url,
   credentials: true,
   methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
 };
