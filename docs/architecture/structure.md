@@ -77,7 +77,7 @@ URL segment. We keep it thin — a `page.tsx` imports a feature component and
 renders it. Logic does not live here. This makes routing obvious and keeps the
 folder from turning into a second components directory.
 
-**Route groups — `(auth)` and `(main)`.** Parentheses make a *group*, not a URL
+**Route groups — `(auth)` and `(main)`.** Parentheses make a _group_, not a URL
 segment. This lets the logged-out pages and the logged-in pages have **two
 different layouts** (a centered auth card vs. a full app shell with nav)
 without affecting the URL. It is the idiomatic App Router way to model
@@ -90,7 +90,7 @@ would contain `PostCard.tsx`, `usePosts.ts`, `postsSlice.ts`, and
 
 **`components/ui` vs `components/common`.** `ui/` is the design-system layer
 installed by shadcn/ui — generic and copy-paste-owned. `common/` is for shared
-*app* components that aren't primitives (Navbar, UserAvatar). Separating them
+_app_ components that aren't primitives (Navbar, UserAvatar). Separating them
 stops the design system from being polluted by app-specific markup.
 
 **`services/` isolates the network.** All HTTP goes through one Axios instance
@@ -159,10 +159,13 @@ routes → middleware → validators → controllers → services → repositori
   surface.
 
 - **`middleware/`** holds cross-cutting concerns that apply to many routes.
-  `errorHandler.ts` gives one consistent error shape; `notFound.ts` handles
-  unmatched routes. Auth and validation middleware slot in here later.
+  `requestLogger.ts` uses Pino HTTP to log every completed request with a
+  correlation ID and status-aware severity. `errorHandler.ts` gives one
+  consistent error shape and logs failures through the request-scoped logger;
+  `notFound.ts` handles unmatched routes. Auth and validation middleware slot
+  in here later.
 
-- **`validators/`** (Zod) validates *input at the boundary*, before a request
+- **`validators/`** (Zod) validates _input at the boundary_, before a request
   ever reaches business logic. This pairs naturally with the client's Zod
   schemas and keeps controllers free of defensive checks.
 
@@ -182,7 +185,8 @@ routes → middleware → validators → controllers → services → repositori
   and validation enforced at the database layer.
 
 - **`constants/`, `types/`, `utils/`** keep magic values, shared types, and pure
-  helpers out of the business layers.
+  helpers out of the business layers. `utils/logger.ts` owns Pino setup,
+  redaction, child-loggers, and the development/production formatting policy.
 
 ### What was deliberately left out
 
@@ -205,5 +209,5 @@ docs/
 ```
 
 Documentation lives with the code so it versioned alongside the system it
-describes. ADRs capture *why* decisions were made; `api/` and `database/`
+describes. ADRs capture _why_ decisions were made; `api/` and `database/`
 capture the contracts the two sides of the app agree on.

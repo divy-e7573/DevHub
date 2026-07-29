@@ -1,44 +1,82 @@
+import type { IncomingMessage } from "node:http";
+import pino, { type Logger as PinoLogger } from "pino";
 import { config } from "../config/config";
 
-type LogLevel = "debug" | "info" | "warn" | "error";
+export type LogContext = Record<string, unknown>;
 
-const logPriorities: Record<LogLevel, number> = {
-  debug: 10,
-  info: 20,
-  warn: 30,
-  error: 40,
-};
-
-function writeLog(level: LogLevel, message: string, meta?: unknown): void {
-  if (logPriorities[level] < logPriorities[config.logging.level]) {
-    return;
-  }
-
-  const prefix = `[${level.toUpperCase()}]`;
-
-  if (level === "error") {
-    // eslint-disable-next-line no-console
-    console.error(prefix, message, meta ?? "");
-    return;
-  }
-
-  if (level === "warn") {
-    // eslint-disable-next-line no-console
-    console.warn(prefix, message, meta ?? "");
-    return;
-  }
-
-  // eslint-disable-next-line no-console
-  console.log(prefix, message, meta ?? "");
+export interface LoggerSettings {
+  environment: string;
+  isDevelopment: boolean;
+  level: pino.LevelWithSilent;
 }
 
-export const logger = {
-  debug: (message: string, meta?: unknown): void =>
-    writeLog("debug", message, meta),
-  info: (message: string, meta?: unknown): void =>
-    writeLog("info", message, meta),
-  warn: (message: string, meta?: unknown): void =>
-    writeLog("warn", message, meta),
-  error: (message: string, meta?: unknown): void =>
-    writeLog("error", message, meta),
-};
+const REDACTED_VALUE = "[REDACTED]";
+
+const redactedPaths = [
+  "req.headers.authorization",
+  "req.headers.cookie",
+  "res.headers.set-cookie",
+  "password",
+  "token",
+  "accessToken",
+  "refreshToken",
+  "*.password",
+  "*.token",
+  "*.accessToken",
+  "*.refreshToken",
+];
+
+function serializeRequest(request: IncomingMessage): Record<string, unknown> {
+  const [path] = (request.url ?? "").split("?");
+
+  return {
+    method: request.method,
+    path,
+    remoteAddress: request.socket.remoteAddress,
+  };
+}
+
+/**
+ * Creates a structured logger with shared service metadata and redaction.
+ * Development uses readable string levels; production retains Pino's compact
+ * numeric level representation for log aggregation systems.
+ */
+export function createLogger(
+  settings: LoggerSettings,
+  destination?: pino.DestinationStream,
+): PinoLogger {
+  return pino(
+    {
+      level: settings.level,
+      base: {
+        service: "devhub-api",
+        environment: settings.environment,
+      },
+      timestamp: pino.stdTimeFunctions.isoTime,
+      formatters: settings.isDevelopment
+        ? {
+            level: (label) => ({ level: label }),
+          }
+        : undefined,
+      redact: {
+        paths: redactedPaths,
+        censor: REDACTED_VALUE,
+      },
+      serializers: {
+        req: serializeRequest,
+      },
+    },
+    destination,
+  );
+}
+
+export const logger = createLogger({
+  environment: config.environment,
+  isDevelopment: config.isDevelopment,
+  level: config.logging.level,
+});
+
+/** Creates a child logger that automatically includes the supplied context. */
+export function createChildLogger(context: LogContext): PinoLogger {
+  return logger.child(context);
+}

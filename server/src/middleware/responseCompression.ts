@@ -20,7 +20,7 @@ function acceptsGzip(req: Request): boolean {
     }
 
     const qualityParameter = parameters.find((parameter) =>
-      parameter.trim().startsWith("q=")
+      parameter.trim().startsWith("q="),
     );
     if (qualityParameter === undefined) {
       return true;
@@ -34,7 +34,7 @@ function acceptsGzip(req: Request): boolean {
 function shouldCompress(
   req: Request,
   res: Response,
-  body: string | Buffer
+  body: string | Buffer,
 ): boolean {
   const contentType = res.getHeader("content-type");
   const cacheControl = res.getHeader("cache-control");
@@ -63,7 +63,7 @@ function shouldCompress(
 export function responseCompression(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void {
   const originalSend = res.send.bind(res);
 
@@ -77,7 +77,7 @@ export function responseCompression(
 
     gzip(body, (error, compressedBody) => {
       if (error) {
-        logger.warn("Response compression failed", error);
+        logger.warn({ err: error }, "Response compression failed");
         originalSend(body);
         return;
       }

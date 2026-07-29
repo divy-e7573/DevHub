@@ -169,15 +169,19 @@ export function errorHandler(
   const normalizedError = normalizeError(error);
   const logContext = {
     method: req.method,
-    path: req.originalUrl,
+    path: req.path,
     statusCode: normalizedError.statusCode,
     code: normalizedError.code,
   };
+  const requestLogger = req.log ?? logger;
 
   if (normalizedError.statusCode >= 500) {
-    logger.error("Unhandled request error", { error, ...logContext });
+    requestLogger.error(
+      { err: error, ...logContext },
+      "Unhandled request error",
+    );
   } else {
-    logger.warn("Request failed", logContext);
+    requestLogger.warn(logContext, "Request failed");
   }
 
   errorResponse(res, {

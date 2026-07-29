@@ -6,7 +6,7 @@ import { logger } from "./utils/logger";
 function closeServer(server: Server): void {
   server.close((error) => {
     if (error) {
-      logger.error("Failed to close HTTP server cleanly", error);
+      logger.error({ err: error }, "Failed to close HTTP server cleanly");
       process.exit(1);
     }
 
@@ -31,6 +31,6 @@ async function start(): Promise<void> {
 }
 
 start().catch((error: unknown) => {
-  logger.error("Failed to start server", error);
+  logger.fatal({ err: error }, "Failed to start server");
   process.exit(1);
 });
