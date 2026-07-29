@@ -15,11 +15,13 @@ implementation.
 | --- | --- | --- |
 | Repository | npm-workspaces monorepo with `client/`, `server/`, and `docs/` packages | Root `package.json`, workspace lockfile |
 | Documentation | Product requirements, engineering rules, architecture rationale, and documentation sections established | `PRD.md`, `Agents.md`, `Architecture.md`, `docs/` |
+| Environment templates | Grouped, documented client and server environment-variable templates with placeholders only | `client/.env.example`, `server/.env.example` |
 | Client foundation | Next.js App Router + TypeScript strict mode; root layout; global Tailwind CSS v4/PostCSS setup; initial landing page | `client/src/app/`, `client/tsconfig.json`, `client/postcss.config.mjs` |
 | Client structure | Auth and main route groups plus feature, component, hook, schema, service, store, config, lib, and type directories | `client/src/` |
 | Client infrastructure | Axios API instance, Redux Toolkit store factory, browser store provider, and `cn` utility | `client/src/services/api.ts`, `client/src/store/`, `client/src/lib/utils.ts` |
 | Server foundation | Express application separated from the process entry point; TypeScript strict mode enabled | `server/src/app.ts`, `server/src/server.ts`, `server/tsconfig.json` |
-| Server infrastructure | Environment/config module, MongoDB connect/disconnect lifecycle, `/health` endpoint, 404 handler, global error handler, logger, and graceful shutdown hooks | `server/src/config/`, `server/src/middleware/`, `server/src/utils/logger.ts` |
+| Server infrastructure | Validated environment configuration, centralized request and error logging, 404/error handling, and graceful HTTP shutdown | `server/src/config/`, `server/src/middleware/`, `server/src/utils/logger.ts` |
+| Backend HTTP foundation | Express bootstrap with Helmet, CORS, Morgan request logging, rate limiting, native gzip response compression, request parsing, and the root API status endpoint | `server/src/app.ts`, `server/src/middleware/`, `server/src/server.ts` |
 | Server structure | Layered directories for routes, controllers, services, repositories, models, validators, middleware, types, constants, and utilities | `server/src/` |
 | Test structure | Unit and integration test locations reserved for future coverage | `server/tests/` |
 | Tooling | Development, build, lint, format, type-check, and test scripts defined for the workspace and packages; dependencies installed | Root, `client/package.json`, `server/package.json` |
@@ -46,8 +48,6 @@ No PRD business features are implemented yet. The following remain pending:
 These are scaffolded or represented by dependencies, but are not complete
 features and should be addressed as part of implementation:
 
-- Wire security middleware (Helmet, CORS, rate limiting, and request logging)
-- Add validated environment parsing with Zod and production-safe error output
 - Add authentication dependencies and the JWT HTTP-only cookie flow
 - Add route/controller/service/model/validator implementations per feature
 - Add API, database schema, and automated unit/integration tests as contracts are created

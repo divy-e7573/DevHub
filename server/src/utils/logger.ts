@@ -1,17 +1,44 @@
-// Minimal logger.
-//
-// Why this exists: logging goes through one module so we can later swap this
-// thin wrapper for a structured logger (e.g. pino/winston) without touching
-// call sites. For now it is intentionally a console-backed stub.
+import { env } from "../config/env";
+
+type LogLevel = "debug" | "info" | "warn" | "error";
+
+const logPriorities: Record<LogLevel, number> = {
+  debug: 10,
+  info: 20,
+  warn: 30,
+  error: 40,
+};
+
+function writeLog(level: LogLevel, message: string, meta?: unknown): void {
+  if (logPriorities[level] < logPriorities[env.LOG_LEVEL]) {
+    return;
+  }
+
+  const prefix = `[${level.toUpperCase()}]`;
+
+  if (level === "error") {
+    // eslint-disable-next-line no-console
+    console.error(prefix, message, meta ?? "");
+    return;
+  }
+
+  if (level === "warn") {
+    // eslint-disable-next-line no-console
+    console.warn(prefix, message, meta ?? "");
+    return;
+  }
+
+  // eslint-disable-next-line no-console
+  console.log(prefix, message, meta ?? "");
+}
 
 export const logger = {
-  info: (message: string, meta?: unknown) =>
-    // eslint-disable-next-line no-console
-    console.log(`[INFO] ${message}`, meta ?? ""),
-  warn: (message: string, meta?: unknown) =>
-    // eslint-disable-next-line no-console
-    console.warn(`[WARN] ${message}`, meta ?? ""),
-  error: (message: string, meta?: unknown) =>
-    // eslint-disable-next-line no-console
-    console.error(`[ERROR] ${message}`, meta ?? ""),
+  debug: (message: string, meta?: unknown): void =>
+    writeLog("debug", message, meta),
+  info: (message: string, meta?: unknown): void =>
+    writeLog("info", message, meta),
+  warn: (message: string, meta?: unknown): void =>
+    writeLog("warn", message, meta),
+  error: (message: string, meta?: unknown): void =>
+    writeLog("error", message, meta),
 };

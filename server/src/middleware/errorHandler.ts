@@ -1,25 +1,46 @@
-// Global error-handling middleware.
-//
-// Why this exists: a single, consistent error shape for every failure in the
-// app. Controllers/services throw (or pass errors via `next(err)`); this is
-// the only place that translates an error into an HTTP response.
+import type { NextFunction, Request, Response } from "express";
+import { env } from "../config/env";
+import { logger } from "../utils/logger";
 
-import { NextFunction, Request, Response } from "express";
+interface IApplicationError extends Error {
+  status?: number;
+  statusCode?: number;
+}
 
 export function errorHandler(
   err: unknown,
-  _req: Request,
+  req: Request,
   res: Response,
-  _next: NextFunction
+  next: NextFunction
 ): void {
-  const status = 500;
-  const message =
-    err instanceof Error ? err.message : "Internal Server Error";
+  if (res.headersSent) {
+    next(err);
+    return;
+  }
 
-  // TODO: map known error types to specific status codes, and hide internals
-  // behind a generic message in production.
-  res.status(status).json({
+  const applicationError =
+    err instanceof Error ? (err as IApplicationError) : undefined;
+  const suppliedStatusCode =
+    applicationError?.statusCode ?? applicationError?.status;
+  const statusCode =
+    typeof suppliedStatusCode === "number" &&
+    suppliedStatusCode >= 400 &&
+    suppliedStatusCode < 600
+      ? suppliedStatusCode
+      : 500;
+  const message =
+    statusCode === 500 && env.NODE_ENV === "production"
+      ? "Internal Server Error"
+      : applicationError?.message ?? "Internal Server Error";
+
+  if (statusCode >= 500) {
+    logger.error("Unhandled request error", err);
+  } else {
+    logger.warn(`${req.method} ${req.originalUrl} failed with ${statusCode}`);
+  }
+
+  res.status(statusCode).json({
     success: false,
-    error: { message },
+    message,
   });
 }

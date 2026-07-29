@@ -7,5 +7,19 @@ consistent response envelope:
 
 ```json
 { "success": true, "data": {} }
-{ "success": false, "error": { "message": "..." } }
+{ "success": false, "message": "..." }
+```
+
+## Infrastructure endpoint
+
+### `GET /`
+
+Confirms that the API process is running. This is the only endpoint exposed
+until product features are implemented.
+
+```json
+{
+  "success": true,
+  "message": "DevHub API Running"
+}
 ```
