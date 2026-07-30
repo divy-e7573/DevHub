@@ -48,7 +48,8 @@ npm run dev          # http://localhost:5000
 
 - [Architecture](docs/architecture/README.md)
 - [API](docs/api/README.md)
-- [Database](docs/database/README.md)
+- [Database](DATABASE.md)
+- [Database design details](docs/database/README.md)
 - [Guides](docs/guides/README.md)
 
 ## Conventions

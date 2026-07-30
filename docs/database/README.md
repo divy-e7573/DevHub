@@ -3,6 +3,8 @@
 Schema design, entity relationships, and indexing strategy for MongoDB live
 here.
 
+The consolidated repository-level reference is [DATABASE.md](../../DATABASE.md).
+
 - [MongoDB model conventions](model-conventions.md) defines timestamps,
   references, indexes, future soft deletion, and cursor pagination standards.
 - [DevHub schema design](schema-design.md) defines the User, Profile, Post,
