@@ -29,8 +29,7 @@ normalized into this error envelope. Unknown server errors use the
 
 ## Versioned route namespace
 
-The initial router composition reserves these versioned namespaces. They do
-not expose endpoint handlers yet:
+The API currently exposes registration beneath the authentication namespace:
 
 ```text
 /api/v1/auth
@@ -38,9 +37,55 @@ not expose endpoint handlers yet:
 /api/v1/posts
 ```
 
-Each future feature owns its endpoint definitions inside its versioned router.
-New API versions can be introduced alongside `v1` without changing existing
-client contracts.
+`/api/v1/users` and `/api/v1/posts` remain reserved for future endpoint
+handlers. Each feature owns its endpoint definitions inside its versioned
+router. New API versions can be introduced alongside `v1` without changing
+existing client contracts.
+
+## Registration
+
+### `POST /api/v1/auth/register`
+
+Creates a user account after validating the request body, checking the
+normalized email and username for duplicates, and hashing the password with
+bcrypt. This endpoint does not issue a JWT, set a cookie, or verify email.
+
+Request body:
+
+```json
+{
+  "name": "Ada Lovelace",
+  "username": "ada_lovelace",
+  "email": "ada@example.com",
+  "password": "correct horse battery staple"
+}
+```
+
+Successful response (`201 Created`):
+
+```json
+{
+  "success": true,
+  "message": "User registered successfully.",
+  "data": {
+    "user": {
+      "id": "507f1f77bcf86cd799439011",
+      "name": "Ada Lovelace",
+      "username": "ada_lovelace",
+      "email": "ada@example.com",
+      "role": "user",
+      "isEmailVerified": false,
+      "createdAt": "2026-07-31T00:00:00.000Z",
+      "updatedAt": "2026-07-31T00:00:00.000Z"
+    }
+  }
+}
+```
+
+Validation failures use `400 VALIDATION_ERROR`. A duplicate normalized email
+or username returns `409` with `EMAIL_ALREADY_EXISTS` or
+`USERNAME_ALREADY_EXISTS`; a concurrent duplicate write is normalized as
+`DUPLICATE_KEY_ERROR`. Password values are never included in responses.
 
 ## Infrastructure endpoint
 

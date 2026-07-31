@@ -1,7 +1,6 @@
 import { Router } from "express";
+import { register } from "../../../controllers/auth.controller";
 
-/**
- * Authentication route namespace. Endpoint handlers will be registered here
- * when the authentication feature is implemented.
- */
 export const authRouter = Router();
+
+authRouter.post("/register", register);

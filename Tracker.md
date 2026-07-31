@@ -36,9 +36,10 @@ implementation.
 
 ## Product features
 
-No PRD business features are implemented yet. The following remain pending:
-
-- Authentication: signup, login, logout, forgot/reset password
+- Authentication: registration is implemented with Zod validation, duplicate
+  email/username checks, bcrypt password hashing, persistence, and a safe
+  created-user response. Login, logout, JWTs, cookies, email verification, and
+  forgot/reset password remain pending.
 - User profiles and profile editing
 - GitHub integration
 - Resume PDF upload and Cloudinary storage
@@ -55,7 +56,7 @@ No PRD business features are implemented yet. The following remain pending:
 These are scaffolded or represented by dependencies, but are not complete
 features and should be addressed as part of implementation:
 
-- Add authentication dependencies and the JWT HTTP-only cookie flow
+- Add the JWT HTTP-only cookie flow
 - Add route/controller/service/model/validator implementations per feature
 - Add API, database schema, and automated unit/integration tests as contracts are created
 
