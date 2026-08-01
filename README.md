@@ -22,9 +22,11 @@ logging, rate limiting, compression, centralized error handling, and a root
 status endpoint. Registration, login, logout, and the protected current-user
 endpoint are available under `/api/v1/auth`; login issues a JWT only in a
 secure HTTP-only cookie. The client includes Redux-backed session restoration
-and `/login` and `/signup` screens. Refresh tokens and email verification are
-not implemented yet. The structure follows clean-architecture principles and
-is meant to scale.
+and `/login` and `/signup` screens. Public developer profiles are available at
+`/[username]`, with typed profile updates, avatar/cover uploads through
+Cloudinary, and a Redux-synchronised edit experience. Refresh tokens and email
+verification are not implemented yet. The structure follows clean-architecture
+principles and is meant to scale.
 
 ## Prerequisites
 

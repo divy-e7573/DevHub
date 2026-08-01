@@ -26,6 +26,12 @@ export function findUserById(
   return User.findById(userId).exec();
 }
 
+export function findUserByUsername(
+  username: string,
+): Promise<HydratedDocument<IUser> | null> {
+  return User.findOne({ username }).exec();
+}
+
 export function createUser(
   userData: CreateUserData,
 ): Promise<HydratedDocument<IUser>> {

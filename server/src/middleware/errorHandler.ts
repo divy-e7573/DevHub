@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
+import multer from "multer";
 import { ZodError } from "zod";
 import type { ErrorDetails, NormalizedError } from "../types/errors";
 import { AppError } from "../utils/AppError";
@@ -112,6 +113,18 @@ function normalizeError(error: unknown): NormalizedError {
 
   if (error instanceof mongoose.Error.CastError) {
     return normalizeCastError(error);
+  }
+
+  if (error instanceof multer.MulterError) {
+    return {
+      statusCode: 400,
+      message:
+        error.code === "LIMIT_FILE_SIZE"
+          ? "Image files must not exceed 5 MB."
+          : "The image upload could not be processed.",
+      code: "UPLOAD_ERROR",
+      details: { field: error.field ?? null, type: error.code },
+    };
   }
 
   if (isDuplicateKeyError(error)) {

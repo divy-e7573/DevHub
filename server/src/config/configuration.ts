@@ -66,6 +66,12 @@ const optionalString = z
   .optional()
   .transform((value) => value || undefined);
 
+const optionalCloudinaryConfiguration = z.object({
+  CLOUDINARY_CLOUD_NAME: optionalString,
+  CLOUDINARY_API_KEY: optionalString,
+  CLOUDINARY_API_SECRET: optionalString,
+});
+
 const environmentSchema = z.object({
   NODE_ENV: runtimeEnvironmentSchema,
   HOST: requiredString("HOST"),
@@ -108,7 +114,7 @@ const environmentSchema = z.object({
     .number({ invalid_type_error: "COOKIE_MAX_AGE_MS must be a number." })
     .int("COOKIE_MAX_AGE_MS must be an integer.")
     .positive("COOKIE_MAX_AGE_MS must be greater than zero."),
-});
+}).and(optionalCloudinaryConfiguration);
 
 type ParsedEnvironment = z.infer<typeof environmentSchema>;
 
@@ -148,6 +154,13 @@ export interface Config {
       secure: boolean;
       sameSite: "lax" | "strict" | "none";
       maxAgeMs: number;
+    }>;
+  }>;
+  readonly media: Readonly<{
+    cloudinary?: Readonly<{
+      cloudName: string;
+      apiKey: string;
+      apiSecret: string;
     }>;
   }>;
 }
@@ -221,6 +234,18 @@ function freezeConfig(environment: ParsedEnvironment): Config {
         sameSite: environment.COOKIE_SAME_SITE,
         maxAgeMs: environment.COOKIE_MAX_AGE_MS,
       }),
+    }),
+    media: Object.freeze({
+      cloudinary:
+        environment.CLOUDINARY_CLOUD_NAME &&
+        environment.CLOUDINARY_API_KEY &&
+        environment.CLOUDINARY_API_SECRET
+          ? Object.freeze({
+              cloudName: environment.CLOUDINARY_CLOUD_NAME,
+              apiKey: environment.CLOUDINARY_API_KEY,
+              apiSecret: environment.CLOUDINARY_API_SECRET,
+            })
+          : undefined,
     }),
   });
 }

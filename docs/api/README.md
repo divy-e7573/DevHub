@@ -29,11 +29,12 @@ normalized into this error envelope. Unknown server errors use the
 
 ## Versioned route namespace
 
-The API currently exposes registration and login beneath the authentication
-namespace:
+The API currently exposes authentication and public-profile routes beneath the
+following namespaces:
 
 ```text
 /api/v1/auth
+/api/v1/profiles
 /api/v1/users
 /api/v1/posts
 ```
@@ -42,6 +43,38 @@ namespace:
 handlers. Each feature owns its endpoint definitions inside its versioned
 router. New API versions can be introduced alongside `v1` without changing
 existing client contracts.
+
+## Profiles
+
+Profile responses expose only public identity (`id`, `name`, and `username`)
+and profile data. They never include email, password hashes, roles, JWTs, or
+other account-only fields.
+
+### `GET /api/v1/profiles/:username`
+
+Returns the public profile for a normalized username. A user without saved
+profile details receives a valid empty profile projection, allowing every
+registered developer to have a public profile URL. Unknown usernames return
+`404 PROFILE_NOT_FOUND`.
+
+### `PUT /api/v1/profiles/me`
+
+Requires the HTTP-only authentication cookie. Creates the authenticated user's
+one-to-one profile on first update or updates it subsequently. The request body
+is strict: only `bio`, `location`, `skills`, `experience`, `education`,
+`portfolio`, and `socialLinks` (`github`, `twitter`, `linkedin`) are accepted.
+Nested entries have bounded lengths and URLs/dates are validated before any
+database write.
+
+### `POST /api/v1/profiles/me/avatar`
+
+### `POST /api/v1/profiles/me/cover-image`
+
+Both endpoints require authentication and accept a single `image` multipart
+field. JPEG, PNG, and WebP images up to 5 MB are accepted, transformed and
+stored in Cloudinary; only the resulting secure URL is stored in MongoDB.
+They return `503 MEDIA_NOT_CONFIGURED` until all Cloudinary environment
+variables are configured.
 
 ## Registration
 

@@ -59,10 +59,27 @@ describe("runtime configuration", () => {
           maxAgeMs: 604800000,
         },
       },
+      media: { cloudinary: undefined },
     });
     expect(Object.isFrozen(config)).toBe(true);
     expect(Object.isFrozen(config.server)).toBe(true);
     expect(Object.isFrozen(config.auth)).toBe(true);
+  });
+
+  it("includes Cloudinary configuration only when all credentials are provided", () => {
+    const config = createConfig(
+      createValidEnvironment({
+        CLOUDINARY_CLOUD_NAME: "devhub",
+        CLOUDINARY_API_KEY: "api-key",
+        CLOUDINARY_API_SECRET: "api-secret",
+      }),
+    );
+
+    expect(config.media.cloudinary).toEqual({
+      cloudName: "devhub",
+      apiKey: "api-key",
+      apiSecret: "api-secret",
+    });
   });
 
   it("fails fast when a required environment variable is missing", () => {
