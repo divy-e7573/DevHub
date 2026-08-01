@@ -1,6 +1,6 @@
 # DevHub Development Tracker
 
-Last reviewed: 2026-07-29
+Last reviewed: 2026-08-01
 
 This tracker reflects the implementation currently present in the repository.
 An item is marked complete only when the code or documentation exists and is
@@ -36,9 +36,10 @@ implementation.
 
 ## Product features
 
-- Authentication: registration is implemented with Zod validation, duplicate
-  email/username checks, bcrypt password hashing, persistence, and a safe
-  created-user response. Login, logout, JWTs, cookies, email verification, and
+- Authentication: registration and login are implemented. Login validates
+  credentials, explicitly loads the password hash, compares it with bcrypt,
+  signs a JWT from validated environment configuration, and stores it in an
+  HTTP-only cookie. Refresh tokens, logout, email verification, and
   forgot/reset password remain pending.
 - User profiles and profile editing
 - GitHub integration
@@ -56,7 +57,6 @@ implementation.
 These are scaffolded or represented by dependencies, but are not complete
 features and should be addressed as part of implementation:
 
-- Add the JWT HTTP-only cookie flow
 - Add route/controller/service/model/validator implementations per feature
 - Add API, database schema, and automated unit/integration tests as contracts are created
 
@@ -64,7 +64,7 @@ features and should be addressed as part of implementation:
 
 | PRD phase                                                  | Status                        |
 | ---------------------------------------------------------- | ----------------------------- |
-| Phase 1 — Authentication, Profile, Posts, Likes, Comments  | Not started (foundation only) |
+| Phase 1 — Authentication, Profile, Posts, Likes, Comments  | In progress                   |
 | Phase 2 — GitHub, Resume, Follow System, Search            | Not started                   |
 | Phase 3 — Messaging, Notifications, Admin Dashboard        | Not started                   |
 | Phase 4 — Deployment, Docker, Redis, caching, optimization | Not started                   |

@@ -28,7 +28,7 @@ app.use(responseCompression);
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
-// Infrastructure status endpoint. No business routes are mounted yet.
+// Infrastructure status endpoint, independent of product routes.
 app.get("/", (_req: Request, res: Response) => {
   successResponse(res, "DevHub API Running");
 });

@@ -1,0 +1,17 @@
+process.env.NODE_ENV = "test";
+process.env.HOST = "127.0.0.1";
+process.env.PORT = "5000";
+process.env.CLIENT_URL = "http://localhost:3000";
+process.env.TRUST_PROXY = "false";
+process.env.LOG_LEVEL = "error";
+process.env.RATE_LIMIT_WINDOW_MS = "900000";
+process.env.RATE_LIMIT_MAX_REQUESTS = "100";
+process.env.MONGODB_URI = "mongodb://localhost:27017/devhub-test";
+process.env.JWT_SECRET = "test-only-jwt-secret-that-is-at-least-32-characters";
+process.env.JWT_EXPIRES_IN = "7d";
+process.env.BCRYPT_SALT_ROUNDS = "12";
+process.env.AUTH_COOKIE_NAME = "devhub_auth";
+process.env.COOKIE_DOMAIN = "";
+process.env.COOKIE_SECURE = "false";
+process.env.COOKIE_SAME_SITE = "lax";
+process.env.COOKIE_MAX_AGE_MS = "604800000";

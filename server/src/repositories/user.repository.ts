@@ -14,6 +14,12 @@ export async function usernameExists(username: string): Promise<boolean> {
   return (await User.exists({ username })) !== null;
 }
 
+export function findUserByEmailWithPassword(
+  email: string,
+): Promise<HydratedDocument<IUser> | null> {
+  return User.findOne({ email }).select("+password").exec();
+}
+
 export function createUser(
   userData: CreateUserData,
 ): Promise<HydratedDocument<IUser>> {

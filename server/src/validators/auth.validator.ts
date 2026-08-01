@@ -41,6 +41,13 @@ export const passwordSchema = z
   .min(8, "Password must be at least 8 characters long.")
   .max(128, "Password must not exceed 128 characters.");
 
+export const loginPasswordSchema = z
+  .string({
+    required_error: "Password is required.",
+    invalid_type_error: "Password must be a string.",
+  })
+  .min(1, "Password is required.");
+
 export const registerUserSchema = z
   .object({
     name: nameSchema,
@@ -51,3 +58,12 @@ export const registerUserSchema = z
   .strict();
 
 export type RegisterUserInput = z.infer<typeof registerUserSchema>;
+
+export const loginUserSchema = z
+  .object({
+    email: emailSchema,
+    password: loginPasswordSchema,
+  })
+  .strict();
+
+export type LoginUserInput = z.infer<typeof loginUserSchema>;

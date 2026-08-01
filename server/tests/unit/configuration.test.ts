@@ -13,6 +13,14 @@ function createValidEnvironment(
     RATE_LIMIT_WINDOW_MS: "900000",
     RATE_LIMIT_MAX_REQUESTS: "100",
     MONGODB_URI: "mongodb://localhost:27017/devhub",
+    JWT_SECRET: "development-jwt-secret-that-is-at-least-32-characters",
+    JWT_EXPIRES_IN: "7d",
+    BCRYPT_SALT_ROUNDS: "12",
+    AUTH_COOKIE_NAME: "devhub_auth",
+    COOKIE_DOMAIN: "",
+    COOKIE_SECURE: "false",
+    COOKIE_SAME_SITE: "lax",
+    COOKIE_MAX_AGE_MS: "604800000",
     ...overrides,
   };
 }
@@ -37,9 +45,24 @@ describe("runtime configuration", () => {
         windowMs: 900000,
         maxRequests: 100,
       },
+      auth: {
+        jwt: {
+          secret: "development-jwt-secret-that-is-at-least-32-characters",
+          expiresIn: "7d",
+        },
+        password: { saltRounds: 12 },
+        cookie: {
+          name: "devhub_auth",
+          domain: undefined,
+          secure: false,
+          sameSite: "lax",
+          maxAgeMs: 604800000,
+        },
+      },
     });
     expect(Object.isFrozen(config)).toBe(true);
     expect(Object.isFrozen(config.server)).toBe(true);
+    expect(Object.isFrozen(config.auth)).toBe(true);
   });
 
   it("fails fast when a required environment variable is missing", () => {
@@ -62,6 +85,14 @@ describe("runtime configuration", () => {
         createValidEnvironment({ MONGODB_URI: "https://database.example.com" }),
       ),
     ).toThrow("MONGODB_URI must use the mongodb:// or mongodb+srv:// scheme.");
+    expect(() =>
+      createConfig(
+        createValidEnvironment({
+          COOKIE_SAME_SITE: "none",
+          COOKIE_SECURE: "false",
+        }),
+      ),
+    ).toThrow("COOKIE_SAME_SITE none requires COOKIE_SECURE to be true.");
   });
 
   it("allows local HTTP and no proxy in development", () => {
@@ -76,6 +107,7 @@ describe("runtime configuration", () => {
       NODE_ENV: "production",
       CLIENT_URL: "https://devhub.example.com",
       TRUST_PROXY: "1",
+      COOKIE_SECURE: "true",
     });
 
     const config = createConfig(productionEnvironment);
@@ -88,6 +120,7 @@ describe("runtime configuration", () => {
           NODE_ENV: "production",
           CLIENT_URL: "http://devhub.example.com",
           TRUST_PROXY: "1",
+          COOKIE_SECURE: "true",
         }),
       ),
     ).toThrow("CLIENT_URL must use HTTPS in production.");
@@ -97,8 +130,19 @@ describe("runtime configuration", () => {
           NODE_ENV: "production",
           CLIENT_URL: "https://devhub.example.com",
           TRUST_PROXY: "false",
+          COOKIE_SECURE: "true",
         }),
       ),
     ).toThrow("TRUST_PROXY must be a positive integer in production.");
+    expect(() =>
+      createConfig(
+        createValidEnvironment({
+          NODE_ENV: "production",
+          CLIENT_URL: "https://devhub.example.com",
+          TRUST_PROXY: "1",
+          COOKIE_SECURE: "false",
+        }),
+      ),
+    ).toThrow("COOKIE_SECURE must be true in production.");
   });
 });

@@ -29,7 +29,8 @@ normalized into this error envelope. Unknown server errors use the
 
 ## Versioned route namespace
 
-The API currently exposes registration beneath the authentication namespace:
+The API currently exposes registration and login beneath the authentication
+namespace:
 
 ```text
 /api/v1/auth
@@ -87,12 +88,56 @@ or username returns `409` with `EMAIL_ALREADY_EXISTS` or
 `USERNAME_ALREADY_EXISTS`; a concurrent duplicate write is normalized as
 `DUPLICATE_KEY_ERROR`. Password values are never included in responses.
 
+## Login
+
+### `POST /api/v1/auth/login`
+
+Validates credentials, explicitly selects the otherwise hidden password hash,
+compares it with bcrypt, and signs a JWT with the configured expiry. The token
+is sent only in the configured HTTP-only authentication cookie; it is never
+included in the JSON response.
+
+Request body:
+
+```json
+{
+  "email": "ada@example.com",
+  "password": "correct horse battery staple"
+}
+```
+
+Successful response (`200 OK`):
+
+```json
+{
+  "success": true,
+  "message": "Logged in successfully.",
+  "data": {
+    "user": {
+      "id": "507f1f77bcf86cd799439011",
+      "name": "Ada Lovelace",
+      "username": "ada_lovelace",
+      "email": "ada@example.com",
+      "role": "user",
+      "isEmailVerified": false,
+      "createdAt": "2026-08-01T00:00:00.000Z",
+      "updatedAt": "2026-08-01T00:00:00.000Z"
+    }
+  }
+}
+```
+
+The response sets the configurable authentication cookie with `HttpOnly`,
+`SameSite`, `Secure`, `Path=/`, `Max-Age`, and `Priority=High` attributes.
+Production startup fails if secure cookies are disabled, or if `SameSite=none`
+is used without `Secure`. Invalid or unknown credentials return
+`401 INVALID_CREDENTIALS` without revealing which value failed.
+
 ## Infrastructure endpoint
 
 ### `GET /`
 
-Confirms that the API process is running. This is the only endpoint exposed
-until product features are implemented.
+Confirms that the API process is running independently of product endpoints.
 
 ```json
 {

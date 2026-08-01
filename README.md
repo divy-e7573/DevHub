@@ -19,9 +19,11 @@ This is a **monorepo** containing three top-level areas:
 The initial project foundation is in place. The backend has validated
 configuration, security headers, CORS, Pino structured request and error
 logging, rate limiting, compression, centralized error handling, and a root
-status endpoint. Registration is available at `POST /api/v1/auth/register`;
-login, tokens, cookies, and email verification are not implemented yet. The
-structure follows clean-architecture principles and is meant to scale.
+status endpoint. Registration and login are available at
+`/api/v1/auth/register` and `/api/v1/auth/login`; login issues a JWT only in a
+secure HTTP-only cookie. Refresh tokens, logout, and email verification are
+not implemented yet. The structure follows clean-architecture principles and
+is meant to scale.
 
 ## Prerequisites
 

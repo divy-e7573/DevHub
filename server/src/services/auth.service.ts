@@ -1,17 +1,21 @@
-import { hash } from "bcrypt";
+import { compare, hash } from "bcrypt";
+import { sign } from "jsonwebtoken";
 import type { HydratedDocument } from "mongoose";
+import { config } from "../config/config";
 import type { IUser } from "../models/User";
 import {
   createUser,
   emailExists,
+  findUserByEmailWithPassword,
   usernameExists,
 } from "../repositories/user.repository";
-import type { RegisterUserInput } from "../validators/auth.validator";
+import type {
+  LoginUserInput,
+  RegisterUserInput,
+} from "../validators/auth.validator";
 import { AppError } from "../utils/AppError";
 
-const BCRYPT_SALT_ROUNDS = 12;
-
-export interface RegisteredUser {
+export interface AuthenticatedUser {
   id: string;
   name: string;
   username: string;
@@ -22,7 +26,7 @@ export interface RegisteredUser {
   updatedAt: Date;
 }
 
-function toRegisteredUser(user: HydratedDocument<IUser>): RegisteredUser {
+function toAuthenticatedUser(user: HydratedDocument<IUser>): AuthenticatedUser {
   return {
     id: user._id.toString(),
     name: user.name,
@@ -37,7 +41,7 @@ function toRegisteredUser(user: HydratedDocument<IUser>): RegisteredUser {
 
 export async function registerUser(
   input: RegisterUserInput,
-): Promise<RegisteredUser> {
+): Promise<AuthenticatedUser> {
   if (await emailExists(input.email)) {
     throw new AppError(
       "An account with this email already exists.",
@@ -56,7 +60,7 @@ export async function registerUser(
     );
   }
 
-  const password = await hash(input.password, BCRYPT_SALT_ROUNDS);
+  const password = await hash(input.password, config.auth.password.saltRounds);
   const user = await createUser({
     name: input.name,
     username: input.username,
@@ -64,5 +68,33 @@ export async function registerUser(
     password,
   });
 
-  return toRegisteredUser(user);
+  return toAuthenticatedUser(user);
+}
+
+export interface LoginResult {
+  token: string;
+  user: AuthenticatedUser;
+}
+
+export async function loginUser(input: LoginUserInput): Promise<LoginResult> {
+  const user = await findUserByEmailWithPassword(input.email);
+
+  if (!user || !(await compare(input.password, user.password))) {
+    throw new AppError(
+      "Invalid email or password.",
+      401,
+      "INVALID_CREDENTIALS",
+    );
+  }
+
+  const token = sign({}, config.auth.jwt.secret, {
+    algorithm: "HS256",
+    subject: user._id.toString(),
+    expiresIn: config.auth.jwt.expiresIn,
+  });
+
+  return {
+    token,
+    user: toAuthenticatedUser(user),
+  };
 }
