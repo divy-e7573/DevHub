@@ -4,6 +4,7 @@
 // store provider. It intentionally contains no page content.
 
 import type { Metadata } from "next";
+import { AuthSessionProvider } from "@/features/auth/AuthSessionProvider";
 import { StoreProvider } from "@/store/StoreProvider";
 import "./globals.css";
 
@@ -18,7 +19,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <StoreProvider>{children}</StoreProvider>
+        <StoreProvider>
+          <AuthSessionProvider />
+          {children}
+        </StoreProvider>
       </body>
     </html>
   );

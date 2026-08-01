@@ -10,3 +10,12 @@ export const authCookieOptions: CookieOptions = {
   path: "/",
   priority: "high",
 };
+
+export const authCookieClearOptions: CookieOptions = {
+  httpOnly: true,
+  secure: config.auth.cookie.secure,
+  sameSite: config.auth.cookie.sameSite,
+  domain: config.auth.cookie.domain,
+  path: "/",
+  priority: "high",
+};

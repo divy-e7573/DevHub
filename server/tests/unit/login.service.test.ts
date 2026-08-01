@@ -73,7 +73,7 @@ describe("loginUser", () => {
       loginInput.password,
       "hashed-password",
     );
-    expect(signMock).toHaveBeenCalledWith({}, config.auth.jwt.secret, {
+    expect(signMock).toHaveBeenCalledWith({ role: "user" }, config.auth.jwt.secret, {
       algorithm: "HS256",
       subject: "507f1f77bcf86cd799439011",
       expiresIn: config.auth.jwt.expiresIn,

@@ -3,7 +3,7 @@
 
 Version: 1.0
 
-Status: Planning
+Status: Phase 1 in progress
 
 ---
 
@@ -157,6 +157,11 @@ Can
 ---
 
 ## Authentication
+
+Implementation status (2026-08-01): backend registration, login, logout, and
+current-user authentication are implemented. The frontend has cookie-backed
+Redux session state and login/signup screens. Email verification, refresh
+tokens, and password recovery remain pending.
 
 ### Signup
 

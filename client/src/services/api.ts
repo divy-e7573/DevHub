@@ -9,8 +9,9 @@ import axios from "axios";
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   timeout: 10000,
+  withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });
 
-// TODO: request interceptor (attach auth token once auth is implemented).
-// TODO: response interceptor (normalise errors, handle 401 refresh, etc.).
+// Authentication uses HTTP-only cookies. Tokens are intentionally never read
+// or attached by client-side JavaScript.

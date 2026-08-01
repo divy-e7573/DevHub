@@ -7,6 +7,7 @@ import {
   createUser,
   emailExists,
   findUserByEmailWithPassword,
+  findUserById,
   usernameExists,
 } from "../repositories/user.repository";
 import type {
@@ -87,7 +88,7 @@ export async function loginUser(input: LoginUserInput): Promise<LoginResult> {
     );
   }
 
-  const token = sign({}, config.auth.jwt.secret, {
+  const token = sign({ role: user.role }, config.auth.jwt.secret, {
     algorithm: "HS256",
     subject: user._id.toString(),
     expiresIn: config.auth.jwt.expiresIn,
@@ -97,4 +98,16 @@ export async function loginUser(input: LoginUserInput): Promise<LoginResult> {
     token,
     user: toAuthenticatedUser(user),
   };
+}
+
+export async function getCurrentUser(
+  userId: string,
+): Promise<AuthenticatedUser> {
+  const user = await findUserById(userId);
+
+  if (!user) {
+    throw new AppError("Authenticated user was not found.", 401, "INVALID_TOKEN");
+  }
+
+  return toAuthenticatedUser(user);
 }

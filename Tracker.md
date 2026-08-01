@@ -39,8 +39,10 @@ implementation.
 - Authentication: registration and login are implemented. Login validates
   credentials, explicitly loads the password hash, compares it with bcrypt,
   signs a JWT from validated environment configuration, and stores it in an
-  HTTP-only cookie. Refresh tokens, logout, email verification, and
-  forgot/reset password remain pending.
+  HTTP-only cookie. Logout clears the cookie, `GET /auth/me` is protected by
+  JWT middleware, and the frontend has Redux session state plus login/signup
+  forms. Refresh tokens, email verification, and forgot/reset password remain
+  pending.
 - User profiles and profile editing
 - GitHub integration
 - Resume PDF upload and Cloudinary storage

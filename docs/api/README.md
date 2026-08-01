@@ -133,6 +133,33 @@ Production startup fails if secure cookies are disabled, or if `SameSite=none`
 is used without `Secure`. Invalid or unknown credentials return
 `401 INVALID_CREDENTIALS` without revealing which value failed.
 
+## Logout
+
+### `POST /api/v1/auth/logout`
+
+Clears the authentication cookie using the same path, domain, Secure, and
+SameSite attributes used when it was created. The endpoint is idempotent and
+returns:
+
+```json
+{
+  "success": true,
+  "message": "Logged out successfully."
+}
+```
+
+## Current user
+
+### `GET /api/v1/auth/me`
+
+Requires the authentication cookie. The JWT is verified by authentication
+middleware, then the current user is loaded from MongoDB. Password data is
+never selected or returned.
+
+Successful responses use the same `data.user` shape as login. Missing, expired,
+malformed, or structurally invalid tokens return `401` with
+`AUTHENTICATION_REQUIRED`, `TOKEN_EXPIRED`, or `INVALID_TOKEN`.
+
 ## Infrastructure endpoint
 
 ### `GET /`

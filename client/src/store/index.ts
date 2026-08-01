@@ -5,13 +5,12 @@
 // definition separate from the provider lets us reuse it in tests.
 
 import { configureStore } from "@reduxjs/toolkit";
+import { authReducer } from "@/features/auth/authSlice";
 
 export const makeStore = () =>
   configureStore({
     reducer: {
-      // Feature slices go here, e.g.:
-      // feed: feedReducer,
-      // profile: profileReducer,
+      auth: authReducer,
     },
   });
 

@@ -20,6 +20,12 @@ export function findUserByEmailWithPassword(
   return User.findOne({ email }).select("+password").exec();
 }
 
+export function findUserById(
+  userId: string,
+): Promise<HydratedDocument<IUser> | null> {
+  return User.findById(userId).exec();
+}
+
 export function createUser(
   userData: CreateUserData,
 ): Promise<HydratedDocument<IUser>> {
