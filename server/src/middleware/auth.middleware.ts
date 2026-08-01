@@ -89,3 +89,33 @@ export function authenticate(
     next(new AppError("Invalid authentication token.", 401, "INVALID_TOKEN"));
   }
 }
+
+/** Attaches a verified user when a cookie is present, while preserving public routes. */
+export function optionallyAuthenticate(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+): void {
+  const token = getCookieValue(req.headers.cookie, config.auth.cookie.name);
+
+  if (!token) {
+    next();
+    return;
+  }
+
+  try {
+    const decoded = verify(token, config.auth.jwt.secret, { algorithms: ["HS256"] });
+    if (typeof decoded === "string" || !isValidAuthPayload(decoded)) {
+      next(new AppError("Invalid authentication token.", 401, "INVALID_TOKEN"));
+      return;
+    }
+    req.user = { id: decoded.sub, role: decoded.role };
+    next();
+  } catch (error) {
+    if (error instanceof TokenExpiredError) {
+      next(new AppError("Authentication token has expired.", 401, "TOKEN_EXPIRED"));
+      return;
+    }
+    next(new AppError("Invalid authentication token.", 401, "INVALID_TOKEN"));
+  }
+}

@@ -1,8 +1,10 @@
 import { v2 as cloudinary } from "cloudinary";
+import { randomUUID } from "crypto";
 import { config } from "../config/config";
 import { AppError } from "./AppError";
 
 export type ProfileImageKind = "avatar" | "cover";
+export type ImageUploadKind = ProfileImageKind | "post";
 
 interface UploadedImage {
   url: string;
@@ -23,23 +25,25 @@ function getCloudinary(): typeof cloudinary {
   return cloudinary;
 }
 
-export function uploadProfileImage(
+function uploadImage(
   file: Express.Multer.File,
-  kind: ProfileImageKind,
+  kind: ImageUploadKind,
 ): Promise<UploadedImage> {
   const client = getCloudinary();
 
   return new Promise((resolve, reject) => {
     const upload = client.uploader.upload_stream(
       {
-        folder: "devhub/profiles",
+        folder: kind === "post" ? "devhub/posts" : "devhub/profiles",
         resource_type: "image",
-        public_id: `${kind}-${Date.now()}`,
+        public_id: `${kind}-${randomUUID()}`,
         overwrite: false,
         transformation:
           kind === "avatar"
             ? [{ width: 512, height: 512, crop: "fill", gravity: "face" }]
-            : [{ width: 1600, height: 500, crop: "fill", gravity: "auto" }],
+            : kind === "cover"
+              ? [{ width: 1600, height: 500, crop: "fill", gravity: "auto" }]
+              : [{ width: 1800, height: 1800, crop: "limit" }],
       },
       (error, result) => {
         if (error) {
@@ -58,4 +62,17 @@ export function uploadProfileImage(
 
     upload.end(file.buffer);
   });
+}
+
+export function uploadProfileImage(
+  file: Express.Multer.File,
+  kind: ProfileImageKind,
+): Promise<UploadedImage> {
+  return uploadImage(file, kind);
+}
+
+export async function uploadPostImages(
+  files: Express.Multer.File[],
+): Promise<string[]> {
+  return Promise.all(files.map(async (file) => (await uploadImage(file, "post")).url));
 }

@@ -212,6 +212,10 @@ Clear cookie
 
 # User Profile
 
+Implementation status (2026-08-01): public profile pages, profile editing,
+bounded career/project data, and Cloudinary avatar/cover-image uploads are
+implemented. Resume upload and GitHub profile enrichment remain pending.
+
 Each profile contains
 
 - Profile photo
@@ -265,6 +269,10 @@ Download button
 
 # Posts
 
+Implementation status (2026-08-01): authenticated users can create text or
+image posts and delete their own posts. Post editing, Markdown support, and
+code snippets remain pending.
+
 Users can
 
 - Create text posts
@@ -280,6 +288,10 @@ Future
 ---
 
 # Feed
+
+Implementation status (2026-08-01): the home page provides a public,
+newest-first cursor-paginated feed. Following-only feeds, suggested users, and
+ranking are pending.
 
 Home page displays
 
@@ -300,6 +312,9 @@ Ranking algorithm
 
 # Likes
 
+Implementation status (2026-08-01): authenticated users can like and unlike
+posts; a unique Like record enforces one like per user and post.
+
 User
 
 Like
@@ -311,6 +326,10 @@ One like per user.
 ---
 
 # Comments
+
+Implementation status (2026-08-01): authenticated users can add comments and
+all visitors can read cursor-paginated comment lists. Comment deletion and
+nested replies remain pending.
 
 Users can
 

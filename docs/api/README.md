@@ -76,6 +76,37 @@ stored in Cloudinary; only the resulting secure URL is stored in MongoDB.
 They return `503 MEDIA_NOT_CONFIGURED` until all Cloudinary environment
 variables are configured.
 
+## Posts, likes, and comments
+
+### `POST /api/v1/posts`
+
+Requires authentication. Accepts `content` and up to four optional `images`
+multipart fields. A post must include non-empty content or at least one image.
+Images use the same JPEG/PNG/WebP and 5 MB limits as profile media.
+
+### `GET /api/v1/posts`
+
+Returns the newest-first public feed as a cursor page. `limit` is capped at
+50; pass the prior response's `pageInfo.endCursor` as `cursor` for the next
+page. Authenticated callers also receive the viewer-specific `isLiked` field.
+
+### `DELETE /api/v1/posts/:id`
+
+Requires authentication and post ownership. It removes the post and its Like
+and Comment records; other users receive `403 POST_FORBIDDEN`.
+
+### `POST` / `DELETE /api/v1/posts/:id/like`
+
+Requires authentication. These idempotently create or remove the caller's
+like and return the updated post projection. The unique Like index prevents
+duplicates under concurrent requests.
+
+### `POST` / `GET /api/v1/posts/:id/comments`
+
+Creating a comment requires authentication and a non-empty `content` field.
+Listing comments is public and uses the same cursor query parameters and
+response shape as the feed.
+
 ## Registration
 
 ### `POST /api/v1/auth/register`

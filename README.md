@@ -25,8 +25,9 @@ secure HTTP-only cookie. The client includes Redux-backed session restoration
 and `/login` and `/signup` screens. Public developer profiles are available at
 `/[username]`, with typed profile updates, avatar/cover uploads through
 Cloudinary, and a Redux-synchronised edit experience. Refresh tokens and email
-verification are not implemented yet. The structure follows clean-architecture
-principles and is meant to scale.
+verification are not implemented yet. The home screen now provides a
+cursor-paginated social feed with post images, likes, and comments. The
+structure follows clean-architecture principles and is meant to scale.
 
 ## Prerequisites
 

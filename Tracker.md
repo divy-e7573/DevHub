@@ -7,7 +7,7 @@ An item is marked complete only when the code or documentation exists and is
 usable; an empty folder or installed dependency does not count as a feature
 implementation.
 
-## Current milestone: project foundation
+## Current milestone: Phase 1 core social features
 
 ### Completed
 
@@ -16,13 +16,13 @@ implementation.
 | Repository               | npm-workspaces monorepo with `client/`, `server/`, and `docs/` packages                                                                                                                                                                                                        | Root `package.json`, workspace lockfile                                                                                       |
 | Documentation            | Product requirements, engineering rules, architecture rationale, and documentation sections established                                                                                                                                                                        | `PRD.md`, `Agents.md`, `Architecture.md`, `docs/`                                                                             |
 | Environment templates    | Grouped, documented client and server environment-variable templates with placeholders only                                                                                                                                                                                    | `client/.env.example`, `server/.env.example`                                                                                  |
-| Client foundation        | Next.js App Router + TypeScript strict mode; root layout; global Tailwind CSS v4/PostCSS setup; initial landing page                                                                                                                                                           | `client/src/app/`, `client/tsconfig.json`, `client/postcss.config.mjs`                                                        |
+| Client foundation        | Next.js App Router + TypeScript strict mode; root layout; global Tailwind CSS v4/PostCSS setup; public social feed home page                                                                                                                                                    | `client/src/app/`, `client/tsconfig.json`, `client/postcss.config.mjs`                                                        |
 | Client structure         | Auth and main route groups plus feature, component, hook, schema, service, store, config, lib, and type directories                                                                                                                                                            | `client/src/`                                                                                                                 |
 | Client infrastructure    | Axios API instance, Redux Toolkit store factory, browser store provider, and `cn` utility                                                                                                                                                                                      | `client/src/services/api.ts`, `client/src/store/`, `client/src/lib/utils.ts`                                                  |
 | Server foundation        | Express application separated from the process entry point; TypeScript strict mode enabled                                                                                                                                                                                     | `server/src/app.ts`, `server/src/server.ts`, `server/tsconfig.json`                                                           |
 | Server infrastructure    | Centralized, immutable runtime configuration with typed environment validation, fail-fast startup checks, and production-specific HTTPS/proxy safeguards; Pino structured request/error logging with request IDs and redaction; 404/error handling, and graceful HTTP shutdown | `server/src/config/`, `server/src/middleware/`, `server/src/utils/logger.ts`                                                  |
 | Backend HTTP foundation  | Express bootstrap with Helmet, CORS, Pino request logging, rate limiting, native gzip response compression, request parsing, and the root API status endpoint                                                                                                                  | `server/src/app.ts`, `server/src/middleware/`, `server/src/server.ts`                                                         |
-| API routing foundation   | Versioned API router composition for `/api/v1/auth`, `/api/v1/users`, and `/api/v1/posts`; feature router modules contain no endpoint handlers until their features are implemented                                                                                            | `server/src/routes/`, `server/src/app.ts`                                                                                     |
+| API routing foundation   | Versioned API router composition for authentication, public profiles, posts, likes, and comments; reserved user route namespace remains available                                                                                                                               | `server/src/routes/`, `server/src/app.ts`                                                                                     |
 | API response utilities   | Typed, reusable helpers for success, created, bad-request, unauthorized, forbidden, not-found, and masked internal-server-error responses; existing HTTP response writers use the shared response utility                                                                      | `server/src/utils/response.ts`, `server/src/types/responses.ts`, `server/src/app.ts`, `server/src/middleware/errorHandler.ts` |
 | Database model standards | Documented conventions for timestamps, naming, ObjectId references, query-led indexes, future soft deletion, and cursor pagination; shared schema-agnostic TypeScript contracts added without creating a business model                                                        | `docs/database/model-conventions.md`, `server/src/types/database.ts`                                                          |
 | Database schema design   | Detailed, implementation-free design for User, Profile, Post, Comment, Follow, Notification, Conversation, and Message relationships, fields, indexes, uniqueness, timestamps, and embedding/reference choices                                                                 | `docs/database/schema-design.md`                                                                                              |
@@ -32,7 +32,11 @@ implementation.
 | Server structure         | Layered directories for routes, controllers, services, repositories, models, validators, middleware, types, constants, and utilities                                                                                                                                           | `server/src/`                                                                                                                 |
 | Test foundation          | Jest + ts-jest configured; configuration, logging, request logger, global error-handler, and response-helper unit coverage added, with an integration-test location reserved                                                                                                   | `server/jest.config.cjs`, `server/tests/`                                                                                     |
 | Tooling                  | Development, build, lint, format, type-check, and test scripts defined for the workspace and packages; dependencies installed                                                                                                                                                  | Root, `client/package.json`, `server/package.json`                                                                            |
-| Verification             | Client/server type checks and production builds pass; backend configuration, logging, global-error, and response-helper tests pass                                                                                                                                             | `npm run type-check`, `npm run build`, `npm test -w server` (2026-07-29)                                                      |
+| Verification             | Client/server type checks pass; backend configuration, profile, social-feed, logging, error-handler, and response tests pass                                                                                                                                                   | `npm run type-check`, `npx tsc --noEmit --incremental false`, `npm test -w server` (2026-08-01)                              |
+| User profiles            | One-to-one Profile model; public profile view; protected typed updates; bounded experience, education, skills, portfolio, and social links; Cloudinary-backed avatar and cover uploads; responsive profile UI with Redux-synchronised editing | `server/src/models/Profile.ts`, `server/src/services/profile.service.ts`, `client/src/features/profile/`, `docs/api/README.md` |
+| Social feed              | Post, Comment, and normalized Like models; newest-first cursor pagination; safe author projections; ownership-protected deletion; idempotent likes; Cloudinary post images; comment creation and listing                          | `server/src/models/Post.ts`, `server/src/models/Comment.ts`, `server/src/models/Like.ts`, `server/src/services/post.service.ts` |
+| Feed client              | Home-page feed with loading/error states, image composer, optimistic Redux likes, comment interaction, and cursor-based “Load more” pagination                                                                                                                                | `client/src/features/feed/`, `client/src/services/post.service.ts`, `client/src/app/page.tsx`                                |
+| Feature verification     | Profile and feed service tests plus route coverage; server unit suite has 12 passing suites and 48 passing tests                                                                                                                                                              | `server/tests/unit/profile.service.test.ts`, `server/tests/unit/post.service.test.ts`, `server/tests/unit/routing.test.ts`     |
 
 ## Product features
 
@@ -43,11 +47,14 @@ implementation.
   JWT middleware, and the frontend has Redux session state plus login/signup
   forms. Refresh tokens, email verification, and forgot/reset password remain
   pending.
-- User profiles and profile editing
+- User profiles and profile editing: implemented. Resume upload and GitHub
+  enrichment remain pending.
 - GitHub integration
 - Resume PDF upload and Cloudinary storage
-- Posts and feed
-- Likes and comments
+- Posts and feed: implemented as a public newest-first feed. Following and
+  suggested-user ranking remain pending.
+- Likes and comments: create/list comments and one-like-per-user interactions
+  are implemented. Comment deletion and nested replies remain pending.
 - Follow system and network views
 - Search across users, posts, and skills
 - Real-time messaging
@@ -59,8 +66,9 @@ implementation.
 These are scaffolded or represented by dependencies, but are not complete
 features and should be addressed as part of implementation:
 
-- Add route/controller/service/model/validator implementations per feature
-- Add API, database schema, and automated unit/integration tests as contracts are created
+- Add integration tests against MongoDB for profile and social-feed write paths
+- Add post editing, comment deletion, and nested replies when those product
+  requirements are scheduled
 
 ## PRD milestone status
 
