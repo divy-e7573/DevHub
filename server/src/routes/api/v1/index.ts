@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authRouter } from "./auth.routes";
 import { postsRouter } from "./posts.routes";
 import { profilesRouter } from "./profiles.routes";
+import { searchRouter } from "./search.routes";
 import { usersRouter } from "./users.routes";
 
 /**
@@ -14,3 +15,4 @@ apiV1Router.use("/auth", authRouter);
 apiV1Router.use("/users", usersRouter);
 apiV1Router.use("/posts", postsRouter);
 apiV1Router.use("/profiles", profilesRouter);
+apiV1Router.use("/search", searchRouter);

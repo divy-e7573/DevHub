@@ -5,6 +5,7 @@ import {
   findProfileByUserId,
   updateProfileByUserId,
 } from "../repositories/profile.repository";
+import { getFollowStats } from "../repositories/follow.repository";
 import type { UpdateProfileInput } from "../validators/profile.validator";
 import { AppError } from "../utils/AppError";
 
@@ -25,11 +26,15 @@ export interface PublicProfile {
   coverImageUrl?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  followersCount: number;
+  followingCount: number;
+  isFollowing: boolean;
 }
 
 function toPublicProfile(
   user: { _id: { toString(): string }; name: string; username: string },
   profile: HydratedDocument<IProfile> | null,
+  followStats: { followersCount: number; followingCount: number; isFollowing: boolean },
 ): PublicProfile {
   return {
     user: {
@@ -48,10 +53,11 @@ function toPublicProfile(
     coverImageUrl: profile?.coverImageUrl,
     createdAt: profile?.createdAt,
     updatedAt: profile?.updatedAt,
+    ...followStats,
   };
 }
 
-export async function getPublicProfile(username: string): Promise<PublicProfile> {
+export async function getPublicProfile(username: string, viewerId?: string): Promise<PublicProfile> {
   const user = await findUserByUsername(username);
 
   if (!user) {
@@ -59,7 +65,7 @@ export async function getPublicProfile(username: string): Promise<PublicProfile>
   }
 
   const profile = await findProfileByUserId(user._id.toString());
-  return toPublicProfile(user, profile);
+  return toPublicProfile(user, profile, await getFollowStats(user._id.toString(), viewerId));
 }
 
 export async function updateCurrentProfile(
@@ -73,7 +79,7 @@ export async function updateCurrentProfile(
   }
 
   const profile = await updateProfileByUserId(userId, input);
-  return toPublicProfile(user, profile);
+  return toPublicProfile(user, profile, await getFollowStats(userId, userId));
 }
 
 export async function updateProfileImage(
@@ -88,5 +94,5 @@ export async function updateProfileImage(
   }
 
   const profile = await updateProfileByUserId(userId, { [field]: imageUrl });
-  return toPublicProfile(user, profile);
+  return toPublicProfile(user, profile, await getFollowStats(userId, userId));
 }

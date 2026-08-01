@@ -70,4 +70,7 @@ userSchema.index({ email: 1 }, { unique: true });
 // Supports public profile lookup and guarantees one stable normalized handle.
 userSchema.index({ username: 1 }, { unique: true });
 
+// Supports bounded full-text people search without exposing account fields.
+userSchema.index({ name: "text", username: "text" });
+
 export const User = model<IUser>("User", userSchema);

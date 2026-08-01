@@ -107,6 +107,31 @@ Creating a comment requires authentication and a non-empty `content` field.
 Listing comments is public and uses the same cursor query parameters and
 response shape as the feed.
 
+## Follows
+
+### `POST` / `DELETE /api/v1/users/:id/follow`
+
+Both endpoints require authentication. A Follow is a normalized directed
+relationship with a unique `{ follower, following }` index. Follow requests
+are idempotent, self-follows return `400 SELF_FOLLOW_NOT_ALLOWED`, and an
+unknown target returns `404 USER_NOT_FOUND`.
+
+### `GET /api/v1/users/:id/followers`
+
+### `GET /api/v1/users/:id/following`
+
+These public endpoints return newest-first cursor pages of safe user identity
+data only (`id`, `name`, and `username`). `limit` is capped at 50.
+
+## Search
+
+### `GET /api/v1/search?q=:query&type=users|posts|skills`
+
+Search requires a query of 2–100 characters and a type. Results are capped by
+an optional `limit` (maximum 30), use MongoDB text indexes, and select only
+public fields. Post results include viewer-specific `isLiked` state when the
+request contains a valid authentication cookie.
+
 ## Registration
 
 ### `POST /api/v1/auth/register`

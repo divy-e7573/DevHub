@@ -45,6 +45,9 @@ export interface Profile {
   coverImageUrl?: string;
   createdAt?: string;
   updatedAt?: string;
+  followersCount: number;
+  followingCount: number;
+  isFollowing: boolean;
 }
 
 export interface UpdateProfileInput {

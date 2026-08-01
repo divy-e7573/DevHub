@@ -344,6 +344,11 @@ Nested replies
 
 # Follow System
 
+Implementation status (2026-08-01): authenticated users can follow and
+unfollow developers, with duplicate and self-follow prevention. Public profile
+pages display relationship counts, an optimistic Follow button, and follower /
+following lists.
+
 Users can
 
 Follow
@@ -388,6 +393,10 @@ User receives notification when
 ---
 
 # Search
+
+Implementation status (2026-08-01): global search supports typed people,
+posts, and skills results through bounded text-index queries, a debounced
+navigation search bar, and a dedicated results page.
 
 Search
 

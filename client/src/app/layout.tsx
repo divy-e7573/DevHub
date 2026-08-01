@@ -6,6 +6,7 @@
 import type { Metadata } from "next";
 import { AuthSessionProvider } from "@/features/auth/AuthSessionProvider";
 import { StoreProvider } from "@/store/StoreProvider";
+import { Navigation } from "@/components/navigation/Navigation";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,6 +22,7 @@ export default function RootLayout({
       <body>
         <StoreProvider>
           <AuthSessionProvider />
+          <Navigation />
           {children}
         </StoreProvider>
       </body>

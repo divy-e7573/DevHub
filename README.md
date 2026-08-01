@@ -27,7 +27,9 @@ and `/login` and `/signup` screens. Public developer profiles are available at
 Cloudinary, and a Redux-synchronised edit experience. Refresh tokens and email
 verification are not implemented yet. The home screen now provides a
 cursor-paginated social feed with post images, likes, and comments. The
-structure follows clean-architecture principles and is meant to scale.
+platform also supports developer follows and typed global search across people,
+posts, and skills. The structure follows clean-architecture principles and is
+meant to scale.
 
 ## Prerequisites
 

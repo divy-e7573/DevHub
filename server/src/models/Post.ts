@@ -25,5 +25,7 @@ const postSchema = new Schema<IPost>(
 postSchema.index({ createdAt: -1, _id: -1 });
 // Supports a user's newest-first posts on their profile.
 postSchema.index({ author: 1, createdAt: -1, _id: -1 });
+// Supports bounded full-text post search.
+postSchema.index({ content: "text" });
 
 export const Post = model<IPost>("Post", postSchema);

@@ -4,12 +4,12 @@ import {
   updateMe,
   uploadImage,
 } from "../../../controllers/profile.controller";
-import { authenticate } from "../../../middleware/auth.middleware";
+import { authenticate, optionallyAuthenticate } from "../../../middleware/auth.middleware";
 import { profileImageUpload } from "../../../middleware/profileUpload.middleware";
 
 export const profilesRouter = Router();
 
-profilesRouter.get("/:username", getByUsername);
+profilesRouter.get("/:username", optionallyAuthenticate, getByUsername);
 profilesRouter.put("/me", authenticate, updateMe);
 profilesRouter.post(
   "/me/avatar",

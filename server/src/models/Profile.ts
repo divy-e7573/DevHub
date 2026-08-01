@@ -104,5 +104,7 @@ const profileSchema = new Schema<IProfile>(
 
 // Supports the one-to-one profile lookup used by public and owner profile views.
 profileSchema.index({ user: 1 }, { unique: true });
+// Added now that skills search is a supported query.
+profileSchema.index({ skills: "text" });
 
 export const Profile = model<IProfile>("Profile", profileSchema);

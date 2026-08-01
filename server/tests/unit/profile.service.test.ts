@@ -10,6 +10,7 @@ import {
   getPublicProfile,
   updateCurrentProfile,
 } from "../../src/services/profile.service";
+import { getFollowStats } from "../../src/repositories/follow.repository";
 
 jest.mock("../../src/repositories/user.repository", () => ({
   findUserById: jest.fn(),
@@ -19,11 +20,13 @@ jest.mock("../../src/repositories/profile.repository", () => ({
   findProfileByUserId: jest.fn(),
   updateProfileByUserId: jest.fn(),
 }));
+jest.mock("../../src/repositories/follow.repository", () => ({ getFollowStats: jest.fn() }));
 
 const findUserByUsernameMock = jest.mocked(findUserByUsername);
 const findUserByIdMock = jest.mocked(findUserById);
 const findProfileByUserIdMock = jest.mocked(findProfileByUserId);
 const updateProfileByUserIdMock = jest.mocked(updateProfileByUserId);
+const getFollowStatsMock = jest.mocked(getFollowStats);
 
 function createUser(): HydratedDocument<IUser> {
   return {
@@ -60,6 +63,7 @@ describe("profile service", () => {
   it("returns only public account fields with profile data", async () => {
     findUserByUsernameMock.mockResolvedValue(createUser());
     findProfileByUserIdMock.mockResolvedValue(createProfile());
+    getFollowStatsMock.mockResolvedValue({ followersCount: 0, followingCount: 0, isFollowing: false });
 
     const profile = await getPublicProfile("ada_lovelace");
 
@@ -80,6 +84,9 @@ describe("profile service", () => {
       coverImageUrl: undefined,
       createdAt: new Date("2026-08-01T00:00:00.000Z"),
       updatedAt: new Date("2026-08-01T00:00:00.000Z"),
+      followersCount: 0,
+      followingCount: 0,
+      isFollowing: false,
     });
     expect(JSON.stringify(profile)).not.toContain("hashed-password");
     expect(JSON.stringify(profile)).not.toContain("ada@example.com");
@@ -90,6 +97,7 @@ describe("profile service", () => {
     const persistedProfile = createProfile();
     findUserByIdMock.mockResolvedValue(user);
     updateProfileByUserIdMock.mockResolvedValue(persistedProfile);
+    getFollowStatsMock.mockResolvedValue({ followersCount: 0, followingCount: 0, isFollowing: false });
     const input = { bio: "First programmer." };
 
     await expect(updateCurrentProfile("507f1f77bcf86cd799439011", input)).resolves.toMatchObject({

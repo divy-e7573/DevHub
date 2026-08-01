@@ -7,7 +7,7 @@ An item is marked complete only when the code or documentation exists and is
 usable; an empty folder or installed dependency does not count as a feature
 implementation.
 
-## Current milestone: Phase 1 core social features
+## Current milestone: core social features and developer discovery
 
 ### Completed
 
@@ -36,6 +36,8 @@ implementation.
 | User profiles            | One-to-one Profile model; public profile view; protected typed updates; bounded experience, education, skills, portfolio, and social links; Cloudinary-backed avatar and cover uploads; responsive profile UI with Redux-synchronised editing | `server/src/models/Profile.ts`, `server/src/services/profile.service.ts`, `client/src/features/profile/`, `docs/api/README.md` |
 | Social feed              | Post, Comment, and normalized Like models; newest-first cursor pagination; safe author projections; ownership-protected deletion; idempotent likes; Cloudinary post images; comment creation and listing                          | `server/src/models/Post.ts`, `server/src/models/Comment.ts`, `server/src/models/Like.ts`, `server/src/services/post.service.ts` |
 | Feed client              | Home-page feed with loading/error states, image composer, optimistic Redux likes, comment interaction, and cursor-based “Load more” pagination                                                                                                                                | `client/src/features/feed/`, `client/src/services/post.service.ts`, `client/src/app/page.tsx`                                |
+| Follow system            | Normalized Follow model with unique relationship constraint; idempotent follow/unfollow; self-follow prevention; cursor-paginated followers/following; profile counts and optimistic Follow UI                          | `server/src/models/Follow.ts`, `server/src/services/follow.service.ts`, `client/src/features/follow/`                         |
+| Global search            | Text-index search for people, posts, and profile skills; strict typed query contract; safe lean projections; debounced navigation search and categorized results page                                                        | `server/src/services/search.service.ts`, `server/src/repositories/search.repository.ts`, `client/src/features/search/`         |
 | Feature verification     | Profile and feed service tests plus route coverage; server unit suite has 12 passing suites and 48 passing tests                                                                                                                                                              | `server/tests/unit/profile.service.test.ts`, `server/tests/unit/post.service.test.ts`, `server/tests/unit/routing.test.ts`     |
 
 ## Product features
@@ -55,8 +57,10 @@ implementation.
   suggested-user ranking remain pending.
 - Likes and comments: create/list comments and one-like-per-user interactions
   are implemented. Comment deletion and nested replies remain pending.
-- Follow system and network views
-- Search across users, posts, and skills
+- Follow system and network views: follow/unfollow, relationship lists, and
+  profile counts are implemented. Suggested-network views remain pending.
+- Search across users, posts, and skills: implemented with bounded text-index
+  queries. Atlas Search relevance tuning remains pending.
 - Real-time messaging
 - Notifications
 - Admin dashboard and moderation actions
@@ -75,7 +79,7 @@ features and should be addressed as part of implementation:
 | PRD phase                                                  | Status                        |
 | ---------------------------------------------------------- | ----------------------------- |
 | Phase 1 — Authentication, Profile, Posts, Likes, Comments  | In progress                   |
-| Phase 2 — GitHub, Resume, Follow System, Search            | Not started                   |
+| Phase 2 — GitHub, Resume, Follow System, Search            | In progress                   |
 | Phase 3 — Messaging, Notifications, Admin Dashboard        | Not started                   |
 | Phase 4 — Deployment, Docker, Redis, caching, optimization | Not started                   |
 | Phase 5 — AI features, analytics, production improvements  | Not started                   |

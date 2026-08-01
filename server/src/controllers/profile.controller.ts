@@ -24,7 +24,7 @@ export async function getByUsername(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const profile = await getPublicProfile(usernameSchema.parse(req.params.username));
+    const profile = await getPublicProfile(usernameSchema.parse(req.params.username), req.user?.id);
     successResponse(res, "Profile retrieved successfully.", { profile });
   } catch (error) {
     next(error);

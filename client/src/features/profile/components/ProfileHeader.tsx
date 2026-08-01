@@ -2,12 +2,16 @@
 
 import { Github, Linkedin, MapPin, Pencil, Twitter } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { FollowButton } from "@/features/follow/components/FollowButton";
+import type { FollowRelationship } from "@/types/follow";
 import type { Profile } from "@/types/profile";
 
 interface ProfileHeaderProps {
   profile: Profile;
   canEdit: boolean;
   onEdit(): void;
+  onFollowChanged(relationship: FollowRelationship): void;
+  onOpenList(kind: "followers" | "following"): void;
 }
 
 const SOCIAL_LINKS = [
@@ -16,7 +20,7 @@ const SOCIAL_LINKS = [
   { key: "linkedin", label: "LinkedIn", Icon: Linkedin },
 ] as const;
 
-export function ProfileHeader({ profile, canEdit, onEdit }: ProfileHeaderProps) {
+export function ProfileHeader({ profile, canEdit, onEdit, onFollowChanged, onOpenList }: ProfileHeaderProps) {
   const initial = profile.user.name.charAt(0).toUpperCase();
 
   return (
@@ -54,7 +58,7 @@ export function ProfileHeader({ profile, canEdit, onEdit }: ProfileHeaderProps) 
               <Pencil size={16} />
               Edit profile
             </Button>
-          ) : null}
+          ) : <FollowButton userId={profile.user.id} initialIsFollowing={profile.isFollowing} onChanged={onFollowChanged} />}
         </div>
         {profile.location ? (
           <p className="mt-5 flex items-center gap-1.5 text-sm text-slate-600">
@@ -80,6 +84,7 @@ export function ProfileHeader({ profile, canEdit, onEdit }: ProfileHeaderProps) 
             ) : null;
           })}
         </div>
+        <div className="mt-5 flex gap-5 text-sm"><button type="button" onClick={() => onOpenList("followers")} className="text-slate-600 hover:text-indigo-700"><strong className="text-slate-950">{profile.followersCount}</strong> followers</button><button type="button" onClick={() => onOpenList("following")} className="text-slate-600 hover:text-indigo-700"><strong className="text-slate-950">{profile.followingCount}</strong> following</button></div>
       </div>
     </section>
   );
