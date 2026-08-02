@@ -2,21 +2,24 @@
 
 import { useState } from "react";
 import type { Profile } from "@/types/profile";
+import { GitHubShowcase } from "./GitHubShowcase";
+import { ResumeUploader } from "./ResumeUploader";
 
-type ProfileTab = "overview" | "experience" | "education" | "projects";
+type ProfileTab = "overview" | "experience" | "education" | "projects" | "github";
 
 const tabs: Array<{ id: ProfileTab; label: string }> = [
   { id: "overview", label: "Overview" },
   { id: "experience", label: "Experience" },
   { id: "education", label: "Education" },
   { id: "projects", label: "Projects" },
+  { id: "github", label: "GitHub" },
 ];
 
 function DateRange({ startDate, endDate }: { startDate: string; endDate?: string }) {
   return <p className="mt-1 text-sm text-slate-500">{startDate} – {endDate || "Present"}</p>;
 }
 
-export function ProfileTabs({ profile }: { profile: Profile }) {
+export function ProfileTabs({ profile, canEdit, onChanged }: { profile: Profile; canEdit: boolean; onChanged(profile: Profile): void }) {
   const [activeTab, setActiveTab] = useState<ProfileTab>("overview");
 
   return (
@@ -81,6 +84,9 @@ export function ProfileTabs({ profile }: { profile: Profile }) {
             )) : <p className="text-sm text-slate-500">No projects added yet.</p>}
           </div>
         ) : null}
+        {activeTab === "github" ? <GitHubShowcase profile={profile} canEdit={canEdit} onSynced={onChanged} /> : null}
+        {canEdit ? <ResumeUploader onUploaded={onChanged} /> : null}
+        {profile.resumeUrl ? <a className="mt-4 inline-flex items-center text-sm font-medium text-indigo-700 hover:underline" href={profile.resumeUrl} target="_blank" rel="noreferrer">View / Download Resume</a> : null}
       </div>
     </section>
   );

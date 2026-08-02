@@ -132,6 +132,23 @@ an optional `limit` (maximum 30), use MongoDB text indexes, and select only
 public fields. Post results include viewer-specific `isLiked` state when the
 request contains a valid authentication cookie.
 
+## GitHub sync and resumes
+
+### `POST /api/v1/profiles/github/sync`
+
+Requires authentication and a strict `{ "username": "..." }` body. The API
+retrieves the public GitHub account, repositories, stars, and repository
+language totals, then stores a bounded snapshot on the user's Profile. Public
+profile reads use that snapshot and never call GitHub. A missing account
+returns `404 GITHUB_USER_NOT_FOUND`; upstream failures return a safe `502`.
+
+### `POST /api/v1/profiles/resume`
+
+Requires authentication and accepts one `resume` multipart field. The upload
+must be a PDF, have a PDF file signature, and be no larger than 5 MB. The file
+is stored as a Cloudinary raw asset and only its secure URL is stored on the
+Profile. Invalid files return `400 INVALID_RESUME_TYPE`.
+
 ## Registration
 
 ### `POST /api/v1/auth/register`

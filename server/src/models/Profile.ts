@@ -31,6 +31,26 @@ export interface IProfileSocialLinks {
   linkedin?: string;
 }
 
+export interface IProfileGitHubRepository {
+  name: string;
+  description?: string;
+  url: string;
+  stars: number;
+  language?: string;
+}
+
+export interface IProfileGitHub {
+  username: string;
+  profileUrl: string;
+  avatarUrl?: string;
+  followersCount: number;
+  publicReposCount: number;
+  totalStars: number;
+  topLanguages: Array<{ name: string; bytes: number }>;
+  repositories: IProfileGitHubRepository[];
+  syncedAt: Date;
+}
+
 export interface IProfile extends TimestampedEntity {
   user: Schema.Types.ObjectId;
   bio?: string;
@@ -42,6 +62,8 @@ export interface IProfile extends TimestampedEntity {
   socialLinks: IProfileSocialLinks;
   avatarUrl?: string;
   coverImageUrl?: string;
+  github?: IProfileGitHub;
+  resumeUrl?: string;
 }
 
 const experienceSchema = new Schema<IProfileExperience>(
@@ -86,6 +108,32 @@ const socialLinksSchema = new Schema<IProfileSocialLinks>(
   { _id: false },
 );
 
+const githubRepositorySchema = new Schema<IProfileGitHubRepository>(
+  {
+    name: { type: String, required: true, trim: true, maxlength: 100 },
+    description: { type: String, trim: true, maxlength: 500 },
+    url: { type: String, required: true, trim: true, maxlength: 2048 },
+    stars: { type: Number, required: true, min: 0 },
+    language: { type: String, trim: true, maxlength: 80 },
+  },
+  { _id: false },
+);
+
+const githubSchema = new Schema<IProfileGitHub>(
+  {
+    username: { type: String, required: true, trim: true, maxlength: 39 },
+    profileUrl: { type: String, required: true, trim: true, maxlength: 2048 },
+    avatarUrl: { type: String, trim: true, maxlength: 2048 },
+    followersCount: { type: Number, required: true, min: 0 },
+    publicReposCount: { type: Number, required: true, min: 0 },
+    totalStars: { type: Number, required: true, min: 0 },
+    topLanguages: { type: [{ name: String, bytes: Number }], default: [], maxlength: 5 },
+    repositories: { type: [githubRepositorySchema], default: [], maxlength: 6 },
+    syncedAt: { type: Date, required: true },
+  },
+  { _id: false },
+);
+
 const profileSchema = new Schema<IProfile>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
@@ -98,6 +146,8 @@ const profileSchema = new Schema<IProfile>(
     socialLinks: { type: socialLinksSchema, default: {} },
     avatarUrl: { type: String, trim: true, maxlength: 2048 },
     coverImageUrl: { type: String, trim: true, maxlength: 2048 },
+    github: { type: githubSchema },
+    resumeUrl: { type: String, trim: true, maxlength: 2048 },
   },
   { timestamps: true },
 );

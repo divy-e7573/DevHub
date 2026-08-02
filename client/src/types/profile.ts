@@ -28,6 +28,26 @@ export interface ProfileSocialLinks {
   linkedin?: string;
 }
 
+export interface GitHubRepository {
+  name: string;
+  description?: string;
+  url: string;
+  stars: number;
+  language?: string;
+}
+
+export interface GitHubProfile {
+  username: string;
+  profileUrl: string;
+  avatarUrl?: string;
+  followersCount: number;
+  publicReposCount: number;
+  totalStars: number;
+  topLanguages: Array<{ name: string; bytes: number }>;
+  repositories: GitHubRepository[];
+  syncedAt: string;
+}
+
 export interface Profile {
   user: {
     id: string;
@@ -48,6 +68,8 @@ export interface Profile {
   followersCount: number;
   followingCount: number;
   isFollowing: boolean;
+  github?: GitHubProfile;
+  resumeUrl?: string;
 }
 
 export interface UpdateProfileInput {

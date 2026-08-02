@@ -33,7 +33,8 @@ implementation.
 | Test foundation          | Jest + ts-jest configured; configuration, logging, request logger, global error-handler, and response-helper unit coverage added, with an integration-test location reserved                                                                                                   | `server/jest.config.cjs`, `server/tests/`                                                                                     |
 | Tooling                  | Development, build, lint, format, type-check, and test scripts defined for the workspace and packages; dependencies installed                                                                                                                                                  | Root, `client/package.json`, `server/package.json`                                                                            |
 | Verification             | Client/server type checks pass; backend configuration, profile, social-feed, logging, error-handler, and response tests pass                                                                                                                                                   | `npm run type-check`, `npx tsc --noEmit --incremental false`, `npm test -w server` (2026-08-01)                              |
-| User profiles            | One-to-one Profile model; public profile view; protected typed updates; bounded experience, education, skills, portfolio, and social links; Cloudinary-backed avatar and cover uploads; responsive profile UI with Redux-synchronised editing | `server/src/models/Profile.ts`, `server/src/services/profile.service.ts`, `client/src/features/profile/`, `docs/api/README.md` |
+| User profiles            | One-to-one Profile model; public profile view; protected typed updates; bounded career data, social links, GitHub showcase cache, and resume URL; Cloudinary-backed avatar, cover, and PDF uploads; responsive profile UI with Redux-synchronised editing | `server/src/models/Profile.ts`, `server/src/services/profile.service.ts`, `client/src/features/profile/`, `docs/api/README.md` |
+| GitHub and resume        | Explicit GitHub REST sync with a bounded cached repository/language snapshot and safe upstream errors; PDF-only resume upload with MIME, signature, and 5 MB checks | `server/src/services/github.service.ts`, `server/src/middleware/resumeUpload.middleware.ts`, `client/src/features/profile/components/` |
 | Social feed              | Post, Comment, and normalized Like models; newest-first cursor pagination; safe author projections; ownership-protected deletion; idempotent likes; Cloudinary post images; comment creation and listing                          | `server/src/models/Post.ts`, `server/src/models/Comment.ts`, `server/src/models/Like.ts`, `server/src/services/post.service.ts` |
 | Feed client              | Home-page feed with loading/error states, image composer, optimistic Redux likes, comment interaction, and cursor-based “Load more” pagination                                                                                                                                | `client/src/features/feed/`, `client/src/services/post.service.ts`, `client/src/app/page.tsx`                                |
 | Follow system            | Normalized Follow model with unique relationship constraint; idempotent follow/unfollow; self-follow prevention; cursor-paginated followers/following; profile counts and optimistic Follow UI                          | `server/src/models/Follow.ts`, `server/src/services/follow.service.ts`, `client/src/features/follow/`                         |
@@ -49,10 +50,10 @@ implementation.
   JWT middleware, and the frontend has Redux session state plus login/signup
   forms. Refresh tokens, email verification, and forgot/reset password remain
   pending.
-- User profiles and profile editing: implemented. Resume upload and GitHub
-  enrichment remain pending.
-- GitHub integration
-- Resume PDF upload and Cloudinary storage
+- User profiles and profile editing: implemented, including resume upload and
+  GitHub enrichment.
+- GitHub integration: implemented as public-profile sync and cached showcase.
+- Resume PDF upload and Cloudinary storage: implemented with PDF-only checks.
 - Posts and feed: implemented as a public newest-first feed. Following and
   suggested-user ranking remain pending.
 - Likes and comments: create/list comments and one-like-per-user interactions

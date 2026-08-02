@@ -29,7 +29,8 @@ verification are not implemented yet. The home screen now provides a
 cursor-paginated social feed with post images, likes, and comments. The
 platform also supports developer follows and typed global search across people,
 posts, and skills. The structure follows clean-architecture principles and is
-meant to scale.
+meant to scale. Profiles can also cache a GitHub showcase and publish a
+Cloudinary-hosted PDF resume.
 
 ## Prerequisites
 

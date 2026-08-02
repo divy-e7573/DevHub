@@ -8,6 +8,7 @@ import {
 import { getFollowStats } from "../repositories/follow.repository";
 import type { UpdateProfileInput } from "../validators/profile.validator";
 import { AppError } from "../utils/AppError";
+import { fetchGitHubSnapshot } from "./github.service";
 
 export interface PublicProfile {
   user: {
@@ -24,6 +25,8 @@ export interface PublicProfile {
   socialLinks: IProfile["socialLinks"];
   avatarUrl?: string;
   coverImageUrl?: string;
+  github?: IProfile["github"];
+  resumeUrl?: string;
   createdAt?: Date;
   updatedAt?: Date;
   followersCount: number;
@@ -51,6 +54,8 @@ function toPublicProfile(
     socialLinks: profile?.socialLinks ?? {},
     avatarUrl: profile?.avatarUrl,
     coverImageUrl: profile?.coverImageUrl,
+    github: profile?.github,
+    resumeUrl: profile?.resumeUrl,
     createdAt: profile?.createdAt,
     updatedAt: profile?.updatedAt,
     ...followStats,
@@ -94,5 +99,20 @@ export async function updateProfileImage(
   }
 
   const profile = await updateProfileByUserId(userId, { [field]: imageUrl });
+  return toPublicProfile(user, profile, await getFollowStats(userId, userId));
+}
+
+export async function syncGitHubProfile(userId: string, username: string): Promise<PublicProfile> {
+  const user = await findUserById(userId);
+  if (!user) throw new AppError("Authenticated user was not found.", 401, "INVALID_TOKEN");
+  const github = await fetchGitHubSnapshot(username);
+  const profile = await updateProfileByUserId(userId, { github });
+  return toPublicProfile(user, profile, await getFollowStats(userId, userId));
+}
+
+export async function updateResume(userId: string, resumeUrl: string): Promise<PublicProfile> {
+  const user = await findUserById(userId);
+  if (!user) throw new AppError("Authenticated user was not found.", 401, "INVALID_TOKEN");
+  const profile = await updateProfileByUserId(userId, { resumeUrl });
   return toPublicProfile(user, profile, await getFollowStats(userId, userId));
 }

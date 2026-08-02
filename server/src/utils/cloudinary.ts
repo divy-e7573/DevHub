@@ -10,6 +10,8 @@ interface UploadedImage {
   url: string;
 }
 
+interface UploadedRawFile { url: string }
+
 function getCloudinary(): typeof cloudinary {
   const cloudinaryConfiguration = config.media.cloudinary;
 
@@ -75,4 +77,19 @@ export async function uploadPostImages(
   files: Express.Multer.File[],
 ): Promise<string[]> {
   return Promise.all(files.map(async (file) => (await uploadImage(file, "post")).url));
+}
+
+export function uploadResume(file: Express.Multer.File): Promise<UploadedRawFile> {
+  const client = getCloudinary();
+  return new Promise((resolve, reject) => {
+    const upload = client.uploader.upload_stream(
+      { folder: "devhub/resumes", resource_type: "raw", public_id: `resume-${randomUUID()}`, overwrite: false },
+      (error, result) => {
+        if (error) { reject(error); return; }
+        if (!result?.secure_url) { reject(new Error("Cloudinary did not return a resume URL.")); return; }
+        resolve({ url: result.secure_url });
+      },
+    );
+    upload.end(file.buffer);
+  });
 }

@@ -213,8 +213,8 @@ Clear cookie
 # User Profile
 
 Implementation status (2026-08-01): public profile pages, profile editing,
-bounded career/project data, and Cloudinary avatar/cover-image uploads are
-implemented. Resume upload and GitHub profile enrichment remain pending.
+bounded career/project data, avatar/cover media, GitHub showcase caching, and
+PDF resume uploads are implemented.
 
 Each profile contains
 
@@ -236,6 +236,10 @@ Each profile contains
 
 # GitHub Integration
 
+Implementation status (2026-08-01): users can explicitly sync a public GitHub
+username. A bounded cached profile snapshot exposes repositories, stars, top
+languages, and follower statistics without calling GitHub on profile reads.
+
 User connects GitHub username.
 
 System fetches
@@ -252,6 +256,10 @@ Automatically display on profile.
 ---
 
 # Resume Upload
+
+Implementation status (2026-08-01): authenticated users can upload a
+Cloudinary-hosted PDF resume up to 5 MB. Public profiles display a secure view
+or download link when a resume is available.
 
 Accepted
 

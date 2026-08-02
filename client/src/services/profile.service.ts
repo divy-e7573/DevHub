@@ -35,3 +35,30 @@ export async function uploadProfileImage(
   );
   return response.data.data.profile;
 }
+
+export async function syncGitHubProfile(username: string): Promise<Profile> {
+  const response = await api.post<ApiSuccessResponse<ProfileResponse>>(
+    "/v1/profiles/github/sync",
+    { username },
+  );
+  return response.data.data.profile;
+}
+
+export async function uploadResume(
+  file: File,
+  onProgress: (percentage: number) => void,
+): Promise<Profile> {
+  const formData = new FormData();
+  formData.append("resume", file);
+  const response = await api.post<ApiSuccessResponse<ProfileResponse>>(
+    "/v1/profiles/resume",
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+      onUploadProgress: (event) => {
+        if (event.total) onProgress(Math.round((event.loaded / event.total) * 100));
+      },
+    },
+  );
+  return response.data.data.profile;
+}
