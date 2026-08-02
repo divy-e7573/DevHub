@@ -37,6 +37,8 @@ following namespaces:
 /api/v1/profiles
 /api/v1/users
 /api/v1/posts
+/api/v1/conversations
+/api/v1/notifications
 ```
 
 `/api/v1/users` and `/api/v1/posts` remain reserved for future endpoint
@@ -267,6 +269,38 @@ malformed, or structurally invalid tokens return `401` with
 `AUTHENTICATION_REQUIRED`, `TOKEN_EXPIRED`, or `INVALID_TOKEN`.
 
 ## Infrastructure endpoint
+
+## Conversations and messages
+
+### `GET /api/v1/conversations`
+
+Requires authentication and returns the caller's active direct conversations,
+newest activity first. Each item includes the other participant's safe public
+identity and a last-message preview when one exists.
+
+### `GET /api/v1/conversations/:id/messages`
+
+Requires conversation membership. Returns message history as a cursor page;
+`limit` is capped at 50 and `cursor` is opaque. Messages include their sender's
+safe public identity and never expose account-only fields.
+
+The Socket.io server authenticates the same HTTP-only JWT cookie during the
+handshake. Authenticated clients may use `join_room`, `send_message`,
+`typing_indicator`, and `mark_as_read`; they receive `new_message`,
+`typing_indicator`, `messages_read`, `presence_update`, and
+`new_notification` events.
+
+## Notifications
+
+### `GET /api/v1/notifications`
+
+Requires authentication and returns the 50 most recent recipient notifications
+with a safe sender projection and the current unread count.
+
+### `PATCH /api/v1/notifications/read`
+
+Requires authentication and accepts a strict body containing 1–100
+`notificationIds`. Only notifications owned by the caller can be marked read.
 
 ### `GET /`
 

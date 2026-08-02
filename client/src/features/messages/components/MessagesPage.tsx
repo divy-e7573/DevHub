@@ -1,0 +1,45 @@
+"use client";
+
+import { FormEvent, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Send } from "lucide-react";
+import { getConversations, getMessages } from "@/services/conversation.service";
+import { getApiErrorMessage } from "@/services/auth.service";
+import { useSocket } from "@/features/realtime/SocketProvider";
+import { useAppSelector } from "@/store/hooks";
+import type { ChatMessage, ConversationSummary, SocketAcknowledgement } from "@/types/realtime";
+
+function formatTime(date: string): string { return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(new Date(date)); }
+export function MessagesPage() {
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const searchParams = useSearchParams();
+  const socket = useSocket();
+  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(searchParams.get("conversation"));
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isLoading, setIsLoading] = useState(true); const [error, setError] = useState<string | null>(null);
+  const [typing, setTyping] = useState(false); const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
+  const bottomRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { setActiveId(searchParams.get("conversation")); }, [searchParams]);
+  useEffect(() => { if (!isAuthenticated) { setIsLoading(false); return; } let mounted = true; void getConversations().then((data) => { if (!mounted) return; setConversations(data); setActiveId((selected) => selected && data.some((item) => item.id === selected) ? selected : data[0]?.id ?? null); }).catch((requestError) => mounted && setError(getApiErrorMessage(requestError))).finally(() => mounted && setIsLoading(false)); return () => { mounted = false; }; }, [isAuthenticated]);
+  useEffect(() => { if (!activeId) { setMessages([]); return; } let mounted = true; setMessages([]); void getMessages(activeId).then((data) => { if (mounted) setMessages(data.items); }).catch((requestError) => mounted && setError(getApiErrorMessage(requestError))); return () => { mounted = false; }; }, [activeId]);
+  useEffect(() => { if (!socket || !activeId) return; socket.emit("join_room", { conversationId: activeId }); }, [socket, activeId]);
+  useEffect(() => { if (!socket) return; const onMessage = (message: ChatMessage) => { setConversations((items) => { const index = items.findIndex((item) => item.id === message.conversationId); if (index === -1) { void getConversations().then(setConversations); return items; } const copy = [...items]; const current = copy[index]; copy[index] = { ...current, lastMessage: { id: message.id, senderId: message.sender.id, text: message.text, createdAt: message.createdAt, read: message.read }, updatedAt: message.createdAt }; copy.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()); return copy; }); setMessages((items) => message.conversationId === activeId && !items.some((item) => item.id === message.id) ? [...items, message] : items); };
+    const onTyping = (payload: { conversationId: string; isTyping: boolean }) => { if (payload.conversationId === activeId) setTyping(payload.isTyping); };
+    const onPresence = (payload: { userId: string; isOnline: boolean }) => setOnlineUsers((current) => { const next = new Set(current); if (payload.isOnline) next.add(payload.userId); else next.delete(payload.userId); return next; });
+    socket.on("new_message", onMessage); socket.on("typing_indicator", onTyping); socket.on("presence_update", onPresence); return () => { socket.off("new_message", onMessage); socket.off("typing_indicator", onTyping); socket.off("presence_update", onPresence); };
+  }, [socket, activeId]);
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, typing]);
+  if (!isAuthenticated) return <main className="mx-auto max-w-5xl px-4 py-10"><p className="rounded-lg border border-slate-200 bg-white p-5 text-slate-600">Sign in to view your messages.</p></main>;
+  const active = conversations.find((item) => item.id === activeId);
+  return <main className="mx-auto max-w-5xl px-4 py-6"><div className="grid min-h-[36rem] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm md:grid-cols-[18rem_1fr]"><aside className="border-b border-slate-200 md:border-b-0 md:border-r"><h1 className="px-4 py-4 text-lg font-bold text-slate-950">Messages</h1>{isLoading ? <p className="px-4 text-sm text-slate-500">Loading conversations…</p> : conversations.length ? <ul>{conversations.map((conversation) => <li key={conversation.id}><button type="button" onClick={() => setActiveId(conversation.id)} className={`flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 ${activeId === conversation.id ? "bg-indigo-50" : ""}`}><span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-100 font-semibold text-indigo-800">{conversation.participant.name[0]}{onlineUsers.has(conversation.participant.id) ? <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" /> : null}</span><span className="min-w-0"><span className="block truncate text-sm font-semibold text-slate-900">{conversation.participant.name}</span><span className="block truncate text-xs text-slate-500">{conversation.lastMessage?.text ?? "No messages yet"}</span></span></button></li>)}</ul> : <p className="px-4 text-sm text-slate-500">No conversations yet.</p>}</aside><section className="flex min-h-[25rem] flex-col">{active ? <ChatWindow conversation={active} messages={messages} socket={socket} typing={typing} bottomRef={bottomRef} onError={setError} /> : <div className="m-auto text-center text-sm text-slate-500">Select a conversation to start chatting.</div>}{error ? <p className="px-4 pb-2 text-sm text-red-600" role="alert">{error}</p> : null}</section></div></main>;
+}
+
+function ChatWindow({ conversation, messages, socket, typing, bottomRef, onError }: { conversation: ConversationSummary; messages: ChatMessage[]; socket: ReturnType<typeof useSocket>; typing: boolean; bottomRef: React.RefObject<HTMLDivElement | null>; onError(error: string | null): void }) {
+  const [text, setText] = useState(""); const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function emitTyping(isTyping: boolean): void { socket?.emit("typing_indicator", { conversationId: conversation.id, isTyping }); }
+  function changeText(value: string): void { setText(value); emitTyping(true); if (typingTimer.current) clearTimeout(typingTimer.current); typingTimer.current = setTimeout(() => emitTyping(false), 900); }
+  useEffect(() => () => { if (typingTimer.current) clearTimeout(typingTimer.current); emitTyping(false); }, [conversation.id]);
+  function send(event: FormEvent<HTMLFormElement>): void { event.preventDefault(); const messageText = text.trim(); if (!messageText || !socket) return; onError(null); socket.emit("send_message", { recipientId: conversation.participant.id, text: messageText }, (result: SocketAcknowledgement) => { if (!result.ok) onError(result.error ?? "Unable to send message."); }); setText(""); emitTyping(false); }
+  return <><header className="flex items-center gap-3 border-b border-slate-200 px-4 py-3"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 font-semibold text-indigo-800">{conversation.participant.name[0]}</span><div><p className="font-semibold text-slate-950">{conversation.participant.name}</p><p className="text-xs text-slate-500">@{conversation.participant.username}</p></div></header><div className="flex-1 space-y-3 overflow-y-auto p-4">{messages.map((message) => <div key={message.id} className={`flex ${message.sender.id === conversation.participant.id ? "justify-start" : "justify-end"}`}><div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${message.sender.id === conversation.participant.id ? "bg-slate-100 text-slate-800" : "bg-indigo-600 text-white"}`}><p className="whitespace-pre-wrap">{message.text}</p><p className={`mt-1 text-right text-[10px] ${message.sender.id === conversation.participant.id ? "text-slate-400" : "text-indigo-100"}`}>{formatTime(message.createdAt)}</p></div></div>)}{typing ? <p className="text-xs italic text-slate-500">{conversation.participant.name} is typing…</p> : null}<div ref={bottomRef} /></div><form onSubmit={send} className="flex gap-2 border-t border-slate-200 p-3"><input value={text} onChange={(event) => changeText(event.target.value)} maxLength={4000} placeholder="Write a message…" className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500" /><button type="submit" disabled={!text.trim() || !socket} className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"><Send size={16} />Send</button></form></>;
+}

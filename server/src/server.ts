@@ -1,7 +1,8 @@
-import type { Server } from "node:http";
+import { createServer, type Server } from "node:http";
 import app from "./app";
 import { config } from "./config/config";
 import { logger } from "./utils/logger";
+import { initializeSocketServer } from "./sockets/socket.server";
 
 function closeServer(server: Server): void {
   server.close((error) => {
@@ -15,7 +16,9 @@ function closeServer(server: Server): void {
 }
 
 async function start(): Promise<void> {
-  const server = app.listen(config.server.port, config.server.host, () => {
+  const server = createServer(app);
+  initializeSocketServer(server);
+  server.listen(config.server.port, config.server.host, () => {
     logger.info(
       `DevHub API listening on ${config.server.host}:${config.server.port}`,
     );

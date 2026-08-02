@@ -373,6 +373,12 @@ Following
 
 # Messaging
 
+Implementation status (2026-08-02): authenticated users can view active
+one-to-one conversations and cursor-paginated history at `/messages`. Socket.io
+delivers messages, typing updates, presence changes, and read receipts in real
+time; REST endpoints provide the initial data and error fallback. Image and
+voice messages remain pending.
+
 Private chat
 
 Features
@@ -390,6 +396,10 @@ Future
 ---
 
 # Notifications
+
+Implementation status (2026-08-02): likes, comments, follows, and direct
+messages create durable recipient notifications. The header bell displays a
+live unread badge and dropdown, with Socket.io delivery for connected users.
 
 User receives notification when
 

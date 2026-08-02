@@ -11,6 +11,7 @@ import {
 } from "../repositories/follow.repository";
 import type { FollowCursorInput } from "../validators/follow.validator";
 import { AppError } from "../utils/AppError";
+import { createAndEmitNotification } from "./notification.service";
 
 export interface FollowRelationship {
   followingId: string;
@@ -35,8 +36,10 @@ function decodeCursor(cursor?: string): FollowCursorBoundary | undefined {
   } catch { throw new AppError("The supplied cursor is invalid.", 400, "INVALID_CURSOR"); }
 }
 
-async function requireTargetUser(userId: string): Promise<void> {
-  if (!await findUserById(userId)) throw new AppError("User not found.", 404, "USER_NOT_FOUND");
+async function requireTargetUser(userId: string): Promise<Awaited<ReturnType<typeof findUserById>>> {
+  const user = await findUserById(userId);
+  if (!user) throw new AppError("User not found.", 404, "USER_NOT_FOUND");
+  return user;
 }
 
 function isDuplicateKeyError(error: unknown): boolean {
@@ -46,7 +49,9 @@ function isDuplicateKeyError(error: unknown): boolean {
 export async function followUser(followerId: string, followingId: string): Promise<FollowRelationship> {
   if (followerId === followingId) throw new AppError("You cannot follow yourself.", 400, "SELF_FOLLOW_NOT_ALLOWED");
   await requireTargetUser(followingId);
-  try { await createFollow(followerId, followingId); } catch (error) { if (!isDuplicateKeyError(error)) throw error; }
+  let created = false;
+  try { await createFollow(followerId, followingId); created = true; } catch (error) { if (!isDuplicateKeyError(error)) throw error; }
+  if (created) void createAndEmitNotification({ recipientId: followingId, senderId: followerId, type: "follow", link: "/" }).catch(() => undefined);
   const stats = await getFollowStats(followingId, followerId);
   return { followingId, isFollowing: true, followersCount: stats.followersCount };
 }

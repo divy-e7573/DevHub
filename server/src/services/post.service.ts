@@ -19,6 +19,7 @@ import {
 } from "../repositories/post.repository";
 import type { CreateCommentInput, CreatePostInput, CursorPaginationInput } from "../validators/post.validator";
 import { AppError } from "../utils/AppError";
+import { createAndEmitNotification } from "./notification.service";
 
 export interface PostAuthor {
   id: string;
@@ -141,12 +142,13 @@ export async function deletePost(postId: string, userId: string): Promise<void> 
 }
 
 export async function likePost(postId: string, userId: string): Promise<FeedPost> {
-  await findExistingPost(postId);
+  const existingPost = await findExistingPost(postId);
   let created = false;
   try { await createLike(postId, userId); created = true; } catch (error) {
     if (!(typeof error === "object" && error !== null && "code" in error && error.code === 11000)) throw error;
   }
   if (created) await incrementPostCounter(postId, "likesCount", 1);
+  if (created) void createAndEmitNotification({ recipientId: existingPost.author._id.toString(), senderId: userId, type: "like", link: "/" }).catch(() => undefined);
   return toPost(await findExistingPost(postId), new Set([postId]));
 }
 
@@ -158,11 +160,12 @@ export async function unlikePost(postId: string, userId: string): Promise<FeedPo
 }
 
 export async function addComment(postId: string, userId: string, input: CreateCommentInput): Promise<FeedComment> {
-  await findExistingPost(postId);
+  const existingPost = await findExistingPost(postId);
   const comment = await createCommentRecord({ post: postId, author: userId, content: input.content });
   await incrementPostCounter(postId, "commentsCount", 1);
   const populatedComment = await findCommentForFeed(comment._id.toString());
   if (!populatedComment) throw new AppError("Comment could not be retrieved.", 500, "COMMENT_RETRIEVAL_FAILED");
+  void createAndEmitNotification({ recipientId: existingPost.author._id.toString(), senderId: userId, type: "comment", link: "/" }).catch(() => undefined);
   return toComment(populatedComment);
 }
 

@@ -28,7 +28,8 @@ Cloudinary, and a Redux-synchronised edit experience. Refresh tokens and email
 verification are not implemented yet. The home screen now provides a
 cursor-paginated social feed with post images, likes, and comments. The
 platform also supports developer follows and typed global search across people,
-posts, and skills. The structure follows clean-architecture principles and is
+posts, and skills, real-time one-to-one messaging, and live social
+notifications. The structure follows clean-architecture principles and is
 meant to scale. Profiles can also cache a GitHub showcase and publish a
 Cloudinary-hosted PDF resume.
 

@@ -8,6 +8,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { authReducer } from "@/features/auth/authSlice";
 import { profileReducer } from "@/features/profile/profileSlice";
 import { feedReducer } from "@/features/feed/feedSlice";
+import { notificationReducer } from "@/features/notifications/notificationSlice";
 
 export const makeStore = () =>
   configureStore({
@@ -15,6 +16,7 @@ export const makeStore = () =>
       auth: authReducer,
       profile: profileReducer,
       feed: feedReducer,
+      notifications: notificationReducer,
     },
   });
 
